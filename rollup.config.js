@@ -64,6 +64,26 @@ export default [
     input: 'src/index.ts',
     output: {
       exports: 'named',
+      file: 'dist/index.js',
+      format: 'cjs',
+      sourcemap: false,
+    },
+    external: ['react'],
+    plugins: [
+      typescript({
+        ...tsOptions,
+        compilerOptions: {
+          declaration: false,
+        }
+      }),
+      tscAlias(),
+      ...plugins,
+    ],
+  },
+  {
+    input: 'src/index.ts',
+    output: {
+      exports: 'named',
       file: 'dist/index.modern.js',
       format: 'es',
       sourcemap: false,

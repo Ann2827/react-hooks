@@ -1,6 +1,6 @@
 {
   "name": "library-react-hooks",
-  "version": "0.20.1",
+  "version": "0.21.0",
   "description": "React hooks library",
   "author": "Ann Bystrova <ann.bystrova96@mail.ru>",
   "license": "MIT",
@@ -24,6 +24,7 @@
   "module": "dist/index.modern.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
+  "main": "dist/index.js",
   "exports": {
     ".": "./dist/index.modern.js",
     "./core": "./dist/core/index.modern.js",
