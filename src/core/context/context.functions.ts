@@ -2,6 +2,8 @@ import { loggerState, loggerMessage, cleanObjKeys } from '@utils';
 
 import type { IContext, IContextOptions, TContextFn } from './context.types';
 
+// https://react.dev/reference/react/useSyncExternalStore
+
 export class CreateContext<S extends Object> implements IContext<S> {
   #initialState: S;
 

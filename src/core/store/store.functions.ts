@@ -4,7 +4,7 @@ import { onlyPublic, TOnlyPublic } from '@utils';
 import { createContext, IContextOptions, TContextFn, IContext } from '../context';
 import { makeEffectOn } from '../helper';
 
-import { TDataState, IStore, IStoreStateFn, TStoreEnrich } from './store.types';
+import { TDataState, IStore, IStoreStateFn, TStoreEnrich, TStoreEnrichMethods } from './store.types';
 
 // TODO: see reselect lib
 export const makeSubscribe = <S extends TDataState = {}>(Context: IContext<S>): IStore<S>['useSubscribe'] => {
@@ -33,15 +33,22 @@ export const makeSetState = <S extends TDataState = {}>(Context: IContext<S>): (
   };
 };
 
-const makeStore = <S extends TDataState = {}>(initialState: S, options: Partial<IContextOptions>): IStore<S> => {
+// rename? store- хранилище, manager - управляющий
+
+export const makeStore = <S extends TDataState = {}>(initialState: S, options: Partial<IContextOptions>): IStore<S> => {
   const BaseContext = createContext<S>(initialState, options);
   const setState = makeSetState<S>(BaseContext);
   const useSubscribe = makeSubscribe<S>(BaseContext);
 
+  // add loggerFn
   const enrich = <D extends Record<string, any> = {}>(
-    enrichFn: (setState: (fn: ((prev: S) => S) | S) => void, state: () => S, reset: IContext<S>['reset']) => D,
+    enrichFn: (setState: (fn: ((prev: S) => S) | S) => void, { state, reset, on }: TStoreEnrichMethods<S>) => D,
   ): TStoreEnrich<S, D> => {
-    const enrichData: D = enrichFn((fn) => setState(fn), BaseContext.getState, BaseContext.reset);
+    const enrichData: D = enrichFn((fn) => setState(fn), {
+      state: BaseContext.getState,
+      reset: BaseContext.reset,
+      on: BaseContext.on,
+    });
 
     const filterMethods: TOnlyPublic<D> = onlyPublic<D>(enrichData);
 
@@ -62,5 +69,3 @@ const makeStore = <S extends TDataState = {}>(initialState: S, options: Partial<
     on: BaseContext.on,
   };
 };
-
-export default makeStore;

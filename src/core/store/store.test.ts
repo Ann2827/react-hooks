@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { createContext } from '../context';
 
-import makeStore, { makeSubscribe, makeSetState } from './store.functions';
+import { makeSubscribe, makeSetState, makeStore } from './store.functions';
 import { TStoreEnrich } from './store.types';
 
 describe('makeSubscribe hook:', () => {
@@ -37,6 +37,8 @@ describe('makeSetState hook:', () => {
   test('should set state', () => {
     expect(CounterContext.state.counter).toEqual(0);
     setState((state) => ({ ...state, counter: state.counter + 1 }));
+    // TODO:
+    // setState({ counter: 1 });
     expect(CounterContext.state.counter).toEqual(1);
   });
 });
@@ -63,7 +65,7 @@ describe('makeStore hook:', () => {
         logger: false,
         hookName: 'counter',
       },
-    ).enrich<TCounterData>((setState, _state) =>
+    ).enrich<TCounterData>((setState) =>
       ({
         __new() {
           this.setCounter = this.setCounter.bind(this);

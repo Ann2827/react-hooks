@@ -1,4 +1,4 @@
-import { IStore } from '@core';
+import { IStore, TStoreEnrich } from '@core';
 
 export type T{{ properCase name }}State = {
   counter: number;
@@ -11,6 +11,8 @@ export type T{{ properCase name }}State = {
 export interface I{{ properCase name }}Data {
   action(): void;
 }
+
+export type T{{ properCase name }}Store = TStoreEnrich<T{{ properCase name }}State, I{{ properCase name }}Data>;
 
 export interface I{{ properCase name }} {
   /**

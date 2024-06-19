@@ -16,13 +16,13 @@ const useLoader = (): ILoader => {
 
   return {
     active,
-    loaderOn: () => LoaderStore.activate(),
-    loaderOff: () => LoaderStore.determinate(),
+    loaderOn: React.useCallback(LoaderStore.activate, []),
+    loaderOff: React.useCallback(LoaderStore.determinate, []),
     on,
-    loaderStop: () => LoaderStore.stop(),
-    useSubscribe: LoaderStore.useSubscribe,
-    _reset: () => LoaderStore.reset(),
-    reset: () => LoaderStore.reset(),
+    loaderStop: React.useCallback(LoaderStore.stop, []),
+    useSubscribe: React.useCallback(LoaderStore.useSubscribe, []),
+    _reset: React.useCallback(LoaderStore.reset, []),
+    reset: React.useCallback(LoaderStore.reset, []),
   };
 };
 

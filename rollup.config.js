@@ -14,7 +14,7 @@ const getArgvParameter = (argv, key) => {
 const plugins = [];
 const analyze = getArgvParameter(args, '--analyze');
 if (analyze) plugins.push(bundleAnalyzer());
-plugins.push(terser({output: {comments: false}}));
+// plugins.push(terser({output: {comments: false}}));
 const tsOptions = {
   tsconfig: './tsconfig.json',
   include: ['src/**/**/*.ts'],

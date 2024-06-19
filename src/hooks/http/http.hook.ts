@@ -8,6 +8,10 @@ import data from './data';
 import { convertQuery, successFn } from './http.functions';
 
 // TODO: add lazy useLoader and useToast?
+
+/**
+ * @deprecated use useHttps hook or HttpsStore
+ */
 const useHttp = (): HttpI => {
   const [error, setError] = useState<HttpI['error']>({});
   const { loaderOn: on, loaderOff: off } = useLoader();

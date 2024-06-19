@@ -11,7 +11,7 @@ export const logs{{ properCase name }}Enable = (): void => {
 };
 const initialState: T{{ properCase name }}State = { counter: 0 };
 
-const {{ properCase name }}Store = makeStore<T{{ properCase name }}State>(initialState, dataOptions).enrich<I{{ properCase name }}Data>((setState, state) => {
+const {{ properCase name }}Store = makeStore<T{{ properCase name }}State>(initialState, dataOptions).enrich<I{{ properCase name }}Data>((setState, { state, reset, on }) => {
   const action: I{{ properCase name }}Data['action'] = (): void => {
     setState((prev) => ({ counter: prev.counter + 1 }));
   };
