@@ -14,7 +14,9 @@ const initialState: TMessagesState = { counter: 0 };
 // https://ru.wikipedia.org/wiki/Список_кодов_состояния_HTTP
 
 const MessagesStore = makeStore<TMessagesState>(initialState, dataOptions).enrich<IMessagesData>((setState) => {
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   const initialize = () => {};
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   const parse: IMessagesData['parse'] = (response, dataJson): void => {};
 
   return {

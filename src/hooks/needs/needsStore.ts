@@ -12,7 +12,11 @@ export const logsNeedsEnable = (): void => {
 const initialState: TNeedsState = { counter: 0 };
 
 // TODO: turn off messages for named requests from store in https settings and turn on their in this place
-const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INeedsData>((setState, state) => {
+const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INeedsData>((setState) => {
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  const initialize = () => {};
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  const update = () => {};
   const action: INeedsData['action'] = (): void => {
     setState((prev) => ({ counter: prev.counter + 1 }));
   };
@@ -20,9 +24,10 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
   return {
     initialize,
     update,
-    status,
-    store,
-    errors,
+    action,
+    // status,
+    // store,
+    // errors,
   };
 });
 

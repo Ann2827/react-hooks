@@ -41,24 +41,20 @@
       ]
     }
   },
-  "engines": {
-    "node": ">=16",
-    "npm": ">=8"
-  },
   "scripts": {
     "b": "rollup -c",
     "build": "rimraf dist && rollup -c",
     "start": "rollup -c -w",
     "test": "run-s test:lint test:unit",
     "test:lint": "eslint './src/**/*.ts'",
-    "test:unit": "cross-env CI=1 craco test --env=jsdom",
+    "test:unit": "jest",
     "test:watch": "react-scripts test --env=jsdom",
     "predeploy": "cd example && yarn build",
     "deploy": "gh-pages -d example/build",
     "create": "plop --plopfile ./.plop/plop.config.cjs",
     "release": "semantic-release",
     "lint": "eslint './src/**/*.ts' --fix",
-    "t": "jest"
+    "test:old": "cross-env CI=1 craco test --env=jsdom"
   },
   "peerDependencies": {
     "react": ">=16.0.0",

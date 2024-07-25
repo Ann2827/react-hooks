@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 
 import { IMessages } from './messages.types';
 import MessagesStore from './messagesStore';

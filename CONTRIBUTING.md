@@ -10,8 +10,8 @@
 
 ### System requirements
 
-- `node` ^14.18.0
-- `npm` ^8.3.1
+- `node` >=16
+- `npm` >=8
 
 ### Fork
 
