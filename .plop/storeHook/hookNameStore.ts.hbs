@@ -1,0 +1,24 @@
+import { makeStore } from '@core';
+
+import { T{{ properCase name }}State, I{{ properCase name }}Data } from './{{ camelCase name }}.types';
+
+const dataOptions = {
+  hookName: '{{ camelCase name }}',
+  logger: false,
+};
+export const logs{{ properCase name }}Enable = (): void => {
+  dataOptions.logger = true;
+};
+const initialState: T{{ properCase name }}State = { counter: 0 };
+
+const {{ properCase name }}Store = makeStore<T{{ properCase name }}State>(initialState, dataOptions).enrich<I{{ properCase name }}Data>((setState, { state, reset, on }) => {
+  const action: I{{ properCase name }}Data['action'] = (): void => {
+    setState((prev) => ({ counter: prev.counter + 1 }));
+  };
+
+  return {
+    action,
+  };
+});
+
+export default {{ properCase name }}Store;

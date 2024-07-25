@@ -12,7 +12,7 @@ module.exports = {
     configure: (jestConfig, { env, paths, resolve, rootDir }) => {
       const moduleNameMapper = {
         '^@core(.*)$': `${rootDir}/src/core$1`,
-        '^@hooks(.*)$': `${rootDir}/src/hooks$1`,
+        '^@hooks(.*)$': `${rootDixr}/src/hooks$1`,
         '^@utils(.*)$': `${rootDir}/src/utils$1`,
       }
 

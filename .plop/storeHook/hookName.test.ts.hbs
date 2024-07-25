@@ -1,0 +1,17 @@
+import { act, renderHook } from '@testing-library/react-hooks';
+
+import { {{ fullName prefix name }} } from '.';
+
+describe('{{ camelCase name }}.hook function:', () => {
+  beforeEach(() => {
+    const { result } = renderHook(() => {{ fullName prefix name }}());
+    act(() => result.current.reset());
+  });
+
+  test('{{ fullName prefix name }}: should make action', () => {
+    const { result, unmount } = renderHook(() => {{ fullName prefix name }}());
+    act(() => result.current.action());
+    expect(result.current.counter).toEqual(1);
+    unmount();
+  });
+});

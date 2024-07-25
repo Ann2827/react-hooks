@@ -33,6 +33,7 @@ export const cleanObjKeys = <T extends Object = Object, D = Partial<T>>(referenc
   const result = {} as D;
   if (Array.isArray(reference)) return dirty;
   if (typeof reference === 'object' && dirty && typeof dirty === 'object') {
+    console.log('reference', reference);
     (Object.keys(reference) as Array<keyof typeof reference>).forEach((key) => {
       if (!(key in dirty)) return;
 
@@ -45,6 +46,37 @@ export const cleanObjKeys = <T extends Object = Object, D = Partial<T>>(referenc
   }
   return result;
 };
+
+export const isObject = (obj: any): obj is Obj => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    (Object.keys(obj) as Array<keyof typeof obj>).every(
+      (key) => typeof key === 'string' || typeof key === 'number' || typeof key === 'symbol',
+    )
+  );
+};
+
+// const isRecordWithKeys = <K extends string, V>(obj: Record<K, V>, keys: K[]): obj is Record<K, V> => {
+//   return typeof obj === 'object' && obj !== null && Object.keys(obj).every((key) => keys.includes(key as K));
+// };
+export const fillByArray = <K extends string, V>(keys: K[], value: V): Record<K, V> => {
+  return Object.fromEntries<V>(keys.map<[K, V]>((key) => [key, value])) as Record<K, V>;
+};
+
+// const mergeState = <T extends Record<string, unknown>>(fullObj: T, flattenKey: string, update: Partial<T>): T => {
+//   const keys = flattenKey.split('.');
+//   const targetObj = keys.reduce((prev, key) => prev?.[key], fullObj);
+//   as standart merge ...{}
+//   const updateObj = targetObj
+//     ? Object.fromEntries(Object.keys(targetObj).map((key) => [key, update?.[key] ?? targetObj[key]]))
+//     : update;
+//   return keys.reduce(
+//     (prev, key, id, arr) => ({ ...prev, [key]: id === arr.length - 1 ? updateObj : prev[key] }),
+//     fullObj,
+//   );
+// };
+// mergeState<THttpsState>(prev, `status.${statusKey}`, updateStatus);
 
 // /* eslint-disable */
 // export type Flatten<T extends object> = object extends T ? object : {

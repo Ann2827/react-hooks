@@ -11,7 +11,7 @@ export const logsLoaderEnable = (): void => {
 };
 const initialState: TLoaderState = { active: false, quantity: 0 };
 
-const LoaderStore = makeStore<TLoaderState>(initialState, dataOptions).enrich<ILoaderData>((setState, state) => {
+const LoaderStore = makeStore<TLoaderState>(initialState, dataOptions).enrich<ILoaderData>((setState, { state }) => {
   const activate: ILoaderData['activate'] = (): void => {
     setState((prev) => ({ active: true, quantity: prev.quantity + 1 }));
   };

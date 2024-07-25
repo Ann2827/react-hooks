@@ -1,0 +1,37 @@
+import { IStore, TStoreEnrich } from '@core';
+
+export type T{{ properCase name }}State = {
+  counter: number;
+};
+
+/**
+ * @private
+ * @ignore
+ */
+export interface I{{ properCase name }}Data {
+  action(): void;
+}
+
+export type T{{ properCase name }}Store = TStoreEnrich<T{{ properCase name }}State, I{{ properCase name }}Data>;
+
+export interface I{{ properCase name }} {
+  /**
+   * {{ properCase name }} counter
+   */
+  counter: T{{ properCase name }}State['counter'];
+
+  /**
+   * Action
+   */
+  action: I{{ properCase name }}Data['action'];
+
+  /**
+   * Subscribe to the state
+   */
+  useSubscribe: IStore<T{{ properCase name }}State>['useSubscribe'];
+
+  /**
+   * Resets the state
+   */
+  reset: IStore<T{{ properCase name }}State>['reset'];
+}

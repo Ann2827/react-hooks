@@ -4,4 +4,7 @@ export * from './timer';
 export * from './http';
 export * from './toast';
 export * from './loader';
+export * from './https';
+export * from './messages';
+export * from './needs';
 export * from './settings';

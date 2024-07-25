@@ -1,0 +1,17 @@
+import React from 'react';
+
+import { I{{ properCase name }} } from './{{ camelCase name }}.types';
+import {{ properCase name }}Store from './{{ camelCase name }}Store';
+
+const {{ fullName prefix name }} = (): I{{ properCase name }} => {
+  const counter = {{ properCase name }}Store.useSubscribe<number>((state) => state.counter);
+
+  return {
+    counter,
+    action: React.useCallback<I{{ properCase name }}['action']>({{ properCase name }}Store.action, []),
+    useSubscribe: React.useCallback<I{{ properCase name }}['useSubscribe']>({{ properCase name }}Store.useSubscribe, []),
+    reset: React.useCallback<I{{ properCase name }}['reset']>({{ properCase name }}Store.reset, []),
+  };
+};
+
+export default {{ fullName prefix name }};

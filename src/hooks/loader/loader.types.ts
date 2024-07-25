@@ -1,4 +1,4 @@
-import { IStore } from '@core';
+import { IStore, TStoreEnrich } from '@core';
 
 export type TLoaderState = {
   active: boolean;
@@ -17,6 +17,8 @@ export interface ILoaderData {
   determinate(): void;
   stop(): void;
 }
+
+export type TLoaderStore = TStoreEnrich<TLoaderState, ILoaderData>;
 
 export interface ILoader {
   /**

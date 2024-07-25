@@ -16,8 +16,13 @@ export interface IStoreBase<S extends TDataState> extends Object {
   on: IContext<S>['on'];
 }
 export type TStoreEnrich<S extends TDataState = {}, D extends Object = {}> = IStoreBase<S> & TOnlyPublic<D>;
+export type TStoreEnrichMethods<S extends TDataState = {}> = {
+  state: () => S;
+  reset: IContext<S>['reset'];
+  on: IContext<S>['on'];
+};
 export interface IStore<S extends TDataState = {}> extends IStoreBase<S> {
   enrich<D extends Record<string, any> = {}>(
-    enrichFn: (setState: (fn: ((prev: S) => S) | S) => void, state: () => S, reset: IContext<S>['reset']) => D,
+    enrichFn: (setState: (fn: ((prev: S) => S) | S) => void, { state, reset, on }: TStoreEnrichMethods<S>) => D,
   ): TStoreEnrich<S, D>;
 }
