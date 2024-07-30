@@ -1,4 +1,4 @@
-import { IStore, TStoreEnrich } from '@core';
+import type { IStore, TStoreEnrich } from '@core';
 
 /**
  * Interfaces for rewrite

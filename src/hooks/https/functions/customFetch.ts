@@ -9,7 +9,9 @@ export const makeCustomFetch = (
   const realFallback = settings?.realFallback ?? false;
 
   return (input, init, options): Promise<Response> => {
-    if (!makeMock) return fetch(input, init);
+    if (!makeMock) {
+      return fetch(input, init);
+    }
 
     const response: Response | void = checkRequest({
       input,

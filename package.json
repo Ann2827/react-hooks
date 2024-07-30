@@ -25,22 +25,6 @@
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
-  "exports": {
-    ".": "./dist/index.modern.js",
-    "./core": "./dist/core/index.modern.js",
-    "./hooks": "./dist/hooks/index.modern.js",
-    "./package.json": "./package.json"
-  },
-  "typesVersions": {
-    "*": {
-      "core": [
-        "dist/core/index.d.ts"
-      ],
-      "hooks": [
-        "dist/hooks/index.d.ts"
-      ]
-    }
-  },
   "scripts": {
     "b": "rollup -c",
     "build": "rimraf dist && rollup -c",
@@ -54,7 +38,10 @@
     "create": "plop --plopfile ./.plop/plop.config.cjs",
     "release": "semantic-release",
     "lint": "eslint './src/**/*.ts' --fix",
-    "test:old": "cross-env CI=1 craco test --env=jsdom"
+    "test:old": "cross-env CI=1 craco test --env=jsdom",
+    "t:needs": "jest src/hooks/needs/needs.test.ts",
+    "t:https": "jest src/hooks/https/https.test.ts",
+    "t:store": "jest src/core/store/store.test.ts"
   },
   "peerDependencies": {
     "react": "16 || 17 || 18",
@@ -114,5 +101,6 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {}
 }

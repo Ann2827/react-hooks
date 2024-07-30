@@ -5,6 +5,8 @@ export const replace = (
   startTag = '${',
   endTag = '}',
 ): string => {
+  if (!str) return str;
+
   let result: string = str;
 
   const startId = str.indexOf(startTag);

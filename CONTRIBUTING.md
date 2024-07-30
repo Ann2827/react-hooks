@@ -47,3 +47,21 @@ your fork:
 
 - src - library
 - examples - examples
+
+### Локальное подключение библиотеки
+
+`npm-link-better --copy ../library-react-hooks -w`
+
+1. Установить глобально `npm install -g npm-link-better`
+2. Выполнить локально билд в подключаемой библиотеке
+3. Использовать локальную сборку и слушать изменения `npm-link-better --copy path/to/local/lib -w`
+
+Где `path/to/local/lib` - путь к библиотеке относительно корневой папки проекта.
+
+Если структура проектов выглядит так, то `path/to/local/lib` будет `../lib`:
+```
+/root
+├───current-repo
+├───lib
+```
+(Разлинковать можно например, переустановив пакет).

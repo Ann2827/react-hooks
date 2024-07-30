@@ -79,6 +79,7 @@
     }],
     "unicorn/no-for-loop": 0,
     "jest/no-commented-out-tests": 0,
+    "unicorn/prefer-object-from-entries": 0,
     // Сломанное правило
     "unicorn/expiring-todo-comments": 0,
     // Временно отключаю

@@ -49,23 +49,27 @@ describe('makeStore hook:', () => {
     actions: {
       started: boolean;
       updated: boolean;
+      listened: boolean;
     };
   };
   type TCounterData = {
     __new(): TCounterData;
     _setStarted(): void;
+    _listenCount(): void;
     setCounter(): void;
+    getState(): number;
+    wait(count: number): Promise<number>;
   };
   let CounterStore: TStoreEnrich<TCounterState, TCounterData>;
 
   beforeAll(() => {
     CounterStore = makeStore<TCounterState>(
-      { counter: 0, actions: { started: false, updated: false } },
+      { counter: 0, actions: { started: false, updated: false, listened: false } },
       {
         logger: false,
         hookName: 'counter',
       },
-    ).enrich<TCounterData>((setState) =>
+    ).enrich<TCounterData>((setState, { state, on }) =>
       ({
         __new() {
           this.setCounter = this.setCounter.bind(this);
@@ -74,9 +78,30 @@ describe('makeStore hook:', () => {
         _setStarted() {
           setState((prev) => ({ ...prev, actions: { ...prev.actions, started: true } }));
         },
+        _listenCount() {
+          on((_prevState, newState) => {
+            if (newState.counter === 5) {
+              setState((prev) => ({ ...prev, actions: { ...prev.actions, listened: true } }));
+            }
+          });
+        },
         setCounter() {
           this._setStarted();
+          this._listenCount();
           setState((prev) => ({ ...prev, counter: prev.counter + 1 }));
+        },
+        getState() {
+          return state().counter;
+        },
+        wait(c: number) {
+          return new Promise<number>((res) => {
+            const clean = on((_prevState, newState) => {
+              if (newState.counter === c) {
+                clean();
+                res(c);
+              }
+            });
+          });
         },
       }).__new(),
     );
@@ -87,7 +112,9 @@ describe('makeStore hook:', () => {
   });
 
   test('should be available methods', () => {
-    expect(Object.keys(CounterStore).sort()).toEqual(['setCounter', 'reset', 'useSubscribe', 'setState', 'on'].sort());
+    expect(Object.keys(CounterStore).sort()).toEqual(
+      ['setCounter', 'reset', 'useSubscribe', 'setState', 'on', 'getState', 'wait'].sort(),
+    );
   });
 
   test('subscribe to counter', () => {
@@ -129,9 +156,48 @@ describe('makeStore hook:', () => {
 
   test('make setState object', () => {
     const { result, unmount } = renderHook(() => CounterStore.useSubscribe((state) => state.actions));
-    expect(result.current).toEqual({ started: false, updated: false });
+    expect(result.current).toEqual({ started: false, updated: false, listened: false });
     act(() => CounterStore.setCounter());
-    expect(result.current).toEqual({ started: true, updated: false });
+    expect(result.current).toEqual({ started: true, updated: false, listened: false });
     unmount();
+  });
+
+  test('make enrich state and on', () => {
+    const { result, unmount } = renderHook(() => CounterStore.useSubscribe((state) => state.actions));
+    expect(result.current.listened).toEqual(false);
+    let count = 0;
+    act(() => {
+      CounterStore.setCounter();
+      CounterStore.setCounter();
+      CounterStore.setCounter();
+      CounterStore.setCounter();
+      CounterStore.setCounter();
+      count = CounterStore.getState();
+    });
+    expect(count).toEqual(5);
+    expect(result.current.listened).toEqual(true);
+    unmount();
+  });
+
+  test('make wait', async () => {
+    let count = 0;
+    let wait = null;
+    act(() => {
+      CounterStore.setCounter();
+      CounterStore.setCounter();
+      count = CounterStore.getState();
+    });
+    expect(count).toEqual(2);
+    await act(async () => {
+      const [c] = await Promise.all([
+        CounterStore.wait(3),
+        new Promise((res) => {
+          CounterStore.setCounter();
+          res(true);
+        }),
+      ]);
+      wait = c;
+    });
+    expect(wait).toEqual(3);
   });
 });

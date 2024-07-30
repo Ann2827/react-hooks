@@ -8,3 +8,4 @@ export * from './https';
 export * from './messages';
 export * from './needs';
 export * from './settings';
+export * from './settingsOld';

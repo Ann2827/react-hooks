@@ -119,7 +119,7 @@ export const data: DataI = {
     const id = this._lastID;
     const alertTitle = titleData
       ? this._translationFn(titleData.key, this._workWithOptions(titleData.options))
-      : title ?? this._settings.types[type].title;
+      : (title ?? this._settings.types[type].title);
     const alertText = textData ? this._translationFn(textData.key, this._workWithOptions(textData.options)) : text;
     const updated: ToastDataObject = {
       text: alertText,

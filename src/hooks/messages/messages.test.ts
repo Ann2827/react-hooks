@@ -20,7 +20,7 @@ const mockTranslationFn = (key: string): string => {
 describe('MessagesStore:', () => {
   beforeAll(() => {
     MessagesStore.initialize({
-      settings: { autoToast: true },
+      settings: { autoToast: true, duration: 3000 },
       translationFn: mockTranslationFn,
       standardErrors: {},
     });

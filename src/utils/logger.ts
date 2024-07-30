@@ -8,9 +8,10 @@ export const loggerState = (hookName: string, oldState: unknown, newState: unkno
   console.groupEnd();
 };
 
-export const loggerMessage = (hookName: string, message: string): void => {
+export const loggerMessage = (hookName: string, message: string, state?: unknown): void => {
   console.group(`Hook ${hookName}`);
   console.info(message);
+  if (state) console.info('State:', state);
   console.groupCollapsed('Trace');
   console.trace('Trace');
   console.groupEnd();

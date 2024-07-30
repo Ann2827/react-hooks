@@ -43,7 +43,7 @@ const CounterStore = makeStore<TCounterState>(
 ).enrich<TCounterData>((setState, _state) =>
   ({
     __new() {
-      this.setCounter = this.setCounter.bind(this);
+      // this.setCounter = this.setCounter.bind(this);
       return this;
     },
     _setStarted() {
