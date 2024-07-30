@@ -1,29 +1,72 @@
 import { IStore, TStoreEnrich } from '@core';
-
-export type TNeedsState = {
-  counter: number;
-};
+import { IHttpsRequestsConfig } from '@hooks';
 
 /**
- * @private
- * @ignore
+ * Interfaces for rewrite
+ * ==========================================
  */
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface INeedsStoreConfig extends Record<string, unknown> {}
+
+/**
+ * Store types
+ * ==========================================
+ */
+
+export type TNeedsSettings = {
+  // TODO: реализовать
+  loader: boolean;
+  logger: boolean;
+};
+
+export type TNeedsState = {
+  // постоянные после инита
+  settings: TNeedsSettings;
+  requests:
+    | { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] }
+    | null;
+  // меняются
+  store: INeedsStoreConfig | null;
+  state: { [K in keyof INeedsStoreConfig]: boolean | null } | null;
+};
+
+type TNeedsInitialize = {
+  settings: Partial<TNeedsState['settings']>;
+  store: INeedsStoreConfig;
+  requests: { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] };
+};
+
 export interface INeedsData {
-  action(): void;
+  initialize(initial: Partial<TNeedsInitialize>): void;
+  update(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
+  request(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
+  test(): void;
+  set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(key: K, dataJsonFormat: INeedsStoreConfig[K]): void;
 }
 
 export type TNeedsStore = TStoreEnrich<TNeedsState, INeedsData>;
 
 export interface INeeds {
   /**
-   * Needs counter
+   * Needs store state
    */
-  counter: TNeedsState['counter'];
+  state: TNeedsState['state'];
 
   /**
-   * Action
+   * Needs store
    */
-  action: INeedsData['action'];
+  store: TNeedsState['store'];
+
+  /**
+   * Update
+   */
+  update: INeedsData['update'];
+
+  /**
+   * Set exists data
+   */
+  set: INeedsData['set'];
 
   /**
    * Subscribe to the state
@@ -35,3 +78,5 @@ export interface INeeds {
    */
   reset: IStore<TNeedsState>['reset'];
 }
+
+export type TNeedsArgs = (keyof INeedsStoreConfig | [keyof INeedsStoreConfig, ...any])[];

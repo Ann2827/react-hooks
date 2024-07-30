@@ -33,7 +33,7 @@ export const cleanObjKeys = <T extends Object = Object, D = Partial<T>>(referenc
   const result = {} as D;
   if (Array.isArray(reference)) return dirty;
   if (typeof reference === 'object' && dirty && typeof dirty === 'object') {
-    console.log('reference', reference);
+    // console.log('reference', reference);
     (Object.keys(reference) as Array<keyof typeof reference>).forEach((key) => {
       if (!(key in dirty)) return;
 

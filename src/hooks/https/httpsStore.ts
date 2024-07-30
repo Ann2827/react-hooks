@@ -43,8 +43,7 @@ const initialState: THttpsState = {
   status: { request: {}, named: {} },
   tokens: null,
   // customFetch: makeCustomFetch(() => {}, { mockDelay: MOCK_DELAY, realFallback: false, makeMock: false }),
-  // @ts-ignore
-  customFetch: () => {},
+  customFetch: window.fetch,
 };
 
 const getDiff = (msX: number, msY: number): number => {
@@ -144,8 +143,9 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
 
     let response: Response;
     let dataJson: T | IHttpsResponseCatch;
+    const fetchData = fetchDataHandle(url, init, options);
     try {
-      response = await state().customFetch(...fetchDataHandle(url, init, options), {
+      response = await state().customFetch(...fetchData, {
         requestName: statusKey,
         mockName: options?.mockName,
       });
@@ -185,18 +185,16 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
         ) as THttpsStateTokens;
       if (namedRequests) update.namedRequests = { ...namedRequests };
       if (settings) {
-        update.settings = { ...settings, ...prev.settings };
+        update.settings = { ...prev.settings, ...settings };
       }
-      if (mocks) {
-        update.customFetch = makeCustomFetch(makeMocksFn(mocks), {
-          mockDelay: MOCK_DELAY,
-          realFallback: false,
-          makeMock: settings?.mockMode,
-        });
-      }
+      update.customFetch = makeCustomFetch(makeMocksFn(mocks || {}), {
+        mockDelay: MOCK_DELAY,
+        realFallback: false,
+        makeMock: settings?.mockMode,
+      });
       return update;
     });
-    if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized');
+    if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
   };
 
   const setToken: IHttpsData['setToken'] = (name, value): ReturnType<IHttpsData['setToken']> => {

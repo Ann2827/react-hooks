@@ -18,27 +18,29 @@ export const logsSettingsEnable = (): void => {
 };
 const initialState: TSettingsState = { logger: false };
 // TODO: logs only for some hooks
-const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enrich<ISettingsData>((setState) => {
-  const initialize: ISettingsData['initialize'] = (initState): void => {
-    const { logger } = initState;
-    setState(initState);
+const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enrich<ISettingsData>(
+  (setState, { state }) => {
+    const initialize: ISettingsData['initialize'] = (initState): void => {
+      const { logger } = initState;
+      setState(initState);
 
-    if (logger) {
-      logsSettingsEnable();
-      logsLoaderEnable();
-      logsImagePreloaderEnable();
-      logsHttpsEnable();
-      logsMessagesEnable();
-      logsNeedsEnable();
-    }
-    if (dataOptions.logger) loggerMessage(dataOptions.hookName, 'Was initialized');
-  };
+      if (logger) {
+        logsSettingsEnable();
+        logsLoaderEnable();
+        logsImagePreloaderEnable();
+        logsHttpsEnable();
+        logsMessagesEnable();
+        logsNeedsEnable();
+      }
+      if (dataOptions.logger) loggerMessage(dataOptions.hookName, 'Was initialized', state());
+    };
 
-  return {
-    initialize,
-    // TODO: add when deprecated
-    // on,
-  };
-});
+    return {
+      initialize,
+      // TODO: add when deprecated
+      // on,
+    };
+  },
+);
 
 export default SettingsStore;

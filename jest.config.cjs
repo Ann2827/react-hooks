@@ -1,6 +1,9 @@
 const { TextEncoder } = require("util");
+// const fetch = require("node-fetch");
+// import fetch from 'node-fetch';
 
 module.exports = {
+  testEnvironment: 'jsdom',
   moduleNameMapper: {
     '^@core(.*)$': `<rootDir>/src/core$1`,
     '^@hooks(.*)$': `<rootDir>/src/hooks$1`,
@@ -18,6 +21,7 @@ module.exports = {
   ],
   globals: {
     "TextEncoder": TextEncoder,
+    // "fetch": fetch,
   },
   roots: [
     "<rootDir>/src/",

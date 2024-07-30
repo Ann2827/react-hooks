@@ -13,7 +13,7 @@ export const makeSubscribe = <S extends TDataState = {}>(Context: IContext<S>): 
   return <T = unknown>(listener: (state: S) => T): T => {
     // @ts-ignore
     const refListener = React.useRef(listener);
-    const [state, setNewState] = React.useState<T>(refListener.current(Context.state));
+    const [state, setNewState] = React.useState<T>(refListener.current(Context.getState()));
     useEffectOn((prev, next) => {
       // @ts-ignore
       const nextState = refListener.current(next);
@@ -28,8 +28,8 @@ export const makeSubscribe = <S extends TDataState = {}>(Context: IContext<S>): 
 
 export const makeSetState = <S extends TDataState = {}>(Context: IContext<S>): ((fn: IStoreStateFn<S>) => void) => {
   return (fn: IStoreStateFn<S>) => {
-    // @ts-ignore
-    Context.state = typeof fn === 'function' ? fn(Context.state) : fn;
+    // console.log('Context!!!!', Context.getState());
+    Context.state = typeof fn === 'function' ? fn(Context.getState()) : fn;
   };
 };
 

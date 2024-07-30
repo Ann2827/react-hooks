@@ -1,12 +1,12 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import mockResponse from '../../../__mocks__/response';
+import mockFetch from '../../../__mocks__/fetch';
 
-import { useHttps, HttpsStore } from '.';
-import { IHttpsRequest } from './https.types';
+import { useHttps, HttpsStore, IHttpsRequest } from '.';
 
 type TError = { errorCode: number } | { _meta: Record<string, unknown> };
-declare module './https.types' {
+declare module '..' {
   interface IHttpsTokenNames {
     names: 'main' | 'second';
   }
@@ -24,13 +24,16 @@ declare module './https.types' {
 
 describe('https HttpsStore:', () => {
   let restoreResponse: () => void;
+  let restoreFetch: () => void;
   beforeAll(() => {
     restoreResponse = mockResponse();
+    restoreFetch = mockFetch();
     HttpsStore.initialize({
       settings: { loader: true, messages: true, mockMode: true, waitToken: true },
       tokens: {
         main: 'bearer',
         second: 'x-auth:Bearer ${token}',
+        // test: '123',
       },
       // TODO: add settings response when fetch was catch
       // TODO: add messages settings но не сюда, а по имени реквеста проверять в том хуке
@@ -73,6 +76,7 @@ describe('https HttpsStore:', () => {
 
   afterAll(() => {
     restoreResponse();
+    restoreFetch();
     HttpsStore.reset();
   });
 
@@ -107,8 +111,10 @@ describe('https HttpsStore:', () => {
 
 describe('https.hook useHttps:', () => {
   let restoreResponse: () => void;
+  let restoreFetch: () => void;
   beforeAll(() => {
     restoreResponse = mockResponse();
+    restoreFetch = mockFetch();
     HttpsStore.initialize({
       settings: { mockMode: true },
       mocks: {
@@ -121,6 +127,7 @@ describe('https.hook useHttps:', () => {
 
   afterAll(() => {
     restoreResponse();
+    restoreFetch();
     HttpsStore.reset();
   });
 
@@ -132,6 +139,55 @@ describe('https.hook useHttps:', () => {
       data = dataJson;
     });
     expect(data).toEqual({ simple: true });
+    unmount();
+  });
+});
+
+describe('https.hook useHttps named:', () => {
+  let restoreResponse: () => void;
+  let restoreFetch: () => void;
+  beforeAll(() => {
+    restoreResponse = mockResponse();
+    restoreFetch = mockFetch();
+    HttpsStore.initialize({
+      settings: { mockMode: true, waitToken: true },
+      tokens: { main: 'bearer' },
+      namedRequests: {
+        getData: (): IHttpsRequest => ({
+          url: 'https://test.com',
+          tokenName: 'main',
+        }),
+      },
+      mocks: {
+        namedRequests: {
+          getData: {
+            body: { data: 'test' },
+          },
+        },
+      },
+    });
+  });
+
+  afterAll(() => {
+    restoreResponse();
+    restoreFetch();
+    HttpsStore.reset();
+  });
+
+  test('request: should make request', async () => {
+    const { result, unmount } = renderHook(() => useHttps());
+    let data;
+    await act(async () => {
+      const [{ dataJson }] = await Promise.all([
+        result.current.namedRequest('getData'),
+        new Promise((res) => {
+          HttpsStore.setToken('main', 'main_token');
+          res(true);
+        }),
+      ]);
+      data = dataJson;
+    });
+    expect(data).toEqual({ data: 'test' });
     unmount();
   });
 });
