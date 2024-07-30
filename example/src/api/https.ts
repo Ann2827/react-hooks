@@ -1,7 +1,7 @@
-import { HttpsStore, type IHttpsRequest } from 'library-react-hooks/hooks';
+import { HttpsStore, type IHttpsRequest } from 'library-react-hooks';
 
 type TError = { errorCode: number } | { _meta: Record<string, unknown> };
-declare module 'library-react-hooks/hooks' {
+declare module 'library-react-hooks' {
   interface IHttpsTokenNames {
     names: 'main' | 'second';
   }
@@ -51,6 +51,7 @@ HttpsStore.initialize({
         return new Response(JSON.stringify({ scenario1: true }));
       if (requestName === 'https://test.com') return new Response(JSON.stringify({ simple: true }));
       if (mockName === 'scenario3') return new Response(JSON.stringify({ scenario3: true }));
+      return new Response();
     },
   },
 });

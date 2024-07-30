@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { useToast, useLoader, useTimer } from 'library-react-hooks/hooks';
+import { useToast, useLoader, useTimer } from 'library-react-hooks';
 import styles from '../../assests/styles/page.module.scss';
 import classNames from 'classnames';
 import { ReactComponent as ArrowRightIcon } from '../../assests/icons/arrowRight.svg';
