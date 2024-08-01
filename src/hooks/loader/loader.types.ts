@@ -50,7 +50,7 @@ export interface ILoader {
    * This function listens for the events of activate/determinate.
    * @deprecated use useSubscribe hook
    */
-  on(fn: (e: boolean) => void): () => void;
+  // on(fn: (e: boolean) => void): () => void;
 
   /**
    * Resets the state

@@ -39,4 +39,5 @@ export interface IContext<S extends Object> {
    * @deprecated
    */
   getState(): S;
+  logs(enable: boolean): void;
 }

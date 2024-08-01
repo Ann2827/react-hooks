@@ -17,7 +17,6 @@ export interface INeedsStoreConfig extends Record<string, unknown> {}
 export type TNeedsSettings = {
   // TODO: реализовать
   loader: boolean;
-  logger: boolean;
 };
 
 export type TNeedsState = {
@@ -43,6 +42,7 @@ export interface INeedsData {
   request(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
   test(): void;
   set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(key: K, dataJsonFormat: INeedsStoreConfig[K]): void;
+  st: () => TNeedsState;
 }
 
 export type TNeedsStore = TStoreEnrich<TNeedsState, INeedsData>;

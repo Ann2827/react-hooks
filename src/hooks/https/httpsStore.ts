@@ -58,6 +58,8 @@ const defaultStatusRequest: THttpsStateStatusRequest = {
   onHold: false,
 };
 
+// TODO: не делать так, не работает!!!!!! (все проверить и добавить в доку) setState((prev) => { const updates = { ...prev }; some; return update; })
+
 const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHttpsData>((setState, { state, on }) => {
   // Private
   const updateStatusRequest = (statusKey: THttpsStatusKey, data: Partial<THttpsStateStatusRequest>): void => {
