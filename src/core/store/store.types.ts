@@ -14,6 +14,7 @@ export interface IStoreBase<S extends TDataState> extends Object {
    * @deprecated use useSubscribe
    */
   on: IContext<S>['on'];
+  logs: IContext<S>['logs'];
 }
 export type TStoreEnrich<S extends TDataState = {}, D extends Object = {}> = IStoreBase<S> & TOnlyPublic<D>;
 export type TStoreEnrichMethods<S extends TDataState = {}> = {

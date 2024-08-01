@@ -28,6 +28,7 @@ export class CreateContext<S extends Object> implements IContext<S> {
     this.on = this.on.bind(this);
     this.reset = this.reset.bind(this);
     this.getState = this.getState.bind(this);
+    this.logs = this.logs.bind(this);
     if (typeof this._test === 'function') {
       this._test = this._test.bind(this);
     }
@@ -63,9 +64,14 @@ export class CreateContext<S extends Object> implements IContext<S> {
     if (JSON.stringify(cloneThisState) !== JSON.stringify(mergeNewState)) {
       this.#state = mergeNewState;
       this.#event(cloneThisState, mergeNewState);
+      // console.log('!!--state--!!', { ...mergeNewState });
 
       if (logger) loggerState(hookName, cloneThisState, mergeNewState);
     }
+  }
+
+  logs(enable: boolean) {
+    this.#options.logger = enable;
   }
 
   reset(): void {

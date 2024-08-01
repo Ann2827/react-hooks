@@ -29,24 +29,6 @@ export const onlyPublic = <T extends Record<string, unknown>>(obj: T): TOnlyPubl
   return updateObj;
 };
 
-export const cleanObjKeys = <T extends Object = Object, D = Partial<T>>(reference: T, dirty: D): D => {
-  const result = {} as D;
-  if (Array.isArray(reference)) return dirty;
-  if (typeof reference === 'object' && dirty && typeof dirty === 'object') {
-    // console.log('reference', reference);
-    (Object.keys(reference) as Array<keyof typeof reference>).forEach((key) => {
-      if (!(key in dirty)) return;
-
-      const referenceValue = reference[key];
-      result[key as keyof D] =
-        typeof referenceValue === 'object'
-          ? cleanObjKeys(referenceValue as Object, dirty[key as keyof D])
-          : dirty[key as keyof D];
-    });
-  }
-  return result;
-};
-
 export const isObject = (obj: any): obj is Obj => {
   return (
     typeof obj === 'object' &&
@@ -55,6 +37,24 @@ export const isObject = (obj: any): obj is Obj => {
       (key) => typeof key === 'string' || typeof key === 'number' || typeof key === 'symbol',
     )
   );
+};
+
+export const cleanObjKeys = <T extends Object = Object, D = Partial<T>>(reference: T, dirty: D): D => {
+  const result = {} as D;
+  if (Array.isArray(reference)) return dirty;
+  if (isObject(reference) && dirty && isObject(dirty)) {
+    // console.log('reference', reference);
+    (Object.keys(reference) as Array<keyof typeof reference>).forEach((key) => {
+      // @ts-ignore
+      if (!(key in dirty)) return;
+
+      const referenceValue = reference[key];
+      result[key as keyof D] = isObject(referenceValue)
+        ? cleanObjKeys(referenceValue, dirty[key as keyof D])
+        : dirty[key as keyof D];
+    });
+  }
+  return result;
 };
 
 // const isRecordWithKeys = <K extends string, V>(obj: Record<K, V>, keys: K[]): obj is Record<K, V> => {

@@ -113,7 +113,7 @@ describe('makeStore hook:', () => {
 
   test('should be available methods', () => {
     expect(Object.keys(CounterStore).sort()).toEqual(
-      ['setCounter', 'reset', 'useSubscribe', 'setState', 'on', 'getState', 'wait'].sort(),
+      ['setCounter', 'reset', 'useSubscribe', 'setState', 'on', 'getState', 'wait', 'logs'].sort(),
     );
   });
 
@@ -199,5 +199,22 @@ describe('makeStore hook:', () => {
       wait = c;
     });
     expect(wait).toEqual(3);
+  });
+
+  test('make useSubscribe updatable', async () => {
+    let renderCount = 0;
+    let counter = 0;
+    const { unmount } = renderHook(() => {
+      counter = CounterStore.useSubscribe((state) => state.counter);
+      renderCount = renderCount + 1;
+    });
+
+    act(() => {
+      CounterStore.setCounter();
+    });
+
+    expect(renderCount).toEqual(2);
+    expect(counter).toEqual(1);
+    unmount();
   });
 });

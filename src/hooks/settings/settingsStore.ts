@@ -1,11 +1,11 @@
 import { makeStore } from '@core';
 import { loggerMessage } from '@utils';
 
-import { logsLoaderEnable } from '../loader/loaderStore';
+import LoaderStore, { logsLoaderEnable } from '../loader/loaderStore';
 import { logsImagePreloaderEnable } from '../imagePreloader/data';
-import { logsHttpsEnable } from '../https/httpsStore';
-import { logsMessagesEnable } from '../messages/messagesStore';
-import { logsNeedsEnable } from '../needs/needsStore';
+import HttpsStore, { logsHttpsEnable } from '../https/httpsStore';
+import MessagesStore, { logsMessagesEnable } from '../messages/messagesStore';
+import NeedsStore, { logsNeedsEnable } from '../needs/needsStore';
 
 import { TSettingsState, ISettingsData } from './settings.types';
 
@@ -25,12 +25,15 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
       setState(initState);
 
       if (logger) {
+        [SettingsStore, LoaderStore, HttpsStore, MessagesStore, NeedsStore].forEach((item) => {
+          item.logs(true);
+        });
         logsSettingsEnable();
         logsLoaderEnable();
-        logsImagePreloaderEnable();
         logsHttpsEnable();
         logsMessagesEnable();
         logsNeedsEnable();
+        logsImagePreloaderEnable();
       }
       if (dataOptions.logger) loggerMessage(dataOptions.hookName, 'Was initialized', state());
     };

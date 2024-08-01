@@ -1,7 +1,7 @@
 import { makeStore } from '@core';
 import { isObject, loggerMessage } from '@utils';
 
-import { HttpsStore } from '..';
+import { HttpsStore } from '../https';
 
 import { TNeedsState, INeedsData, INeedsStoreConfig } from './needs.types';
 
@@ -15,7 +15,7 @@ export const logsNeedsEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: TNeedsState = {
-  settings: { loader: false, logger: false },
+  settings: { loader: false },
   store: null,
   requests: null,
   state: null,
@@ -26,12 +26,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
   // Private
   const updateSuccessData = <T extends keyof INeedsStoreConfig>(key: T, dataJson: INeedsStoreConfig[T]): void => {
     setState((prev) => {
-      const updateState: TNeedsState = { ...prev };
-      if (updateState.state && updateState.store) {
-        updateState.state[key] = true;
-        updateState.store[key] = dataJson;
-      }
-      return updateState;
+      return { ...prev, state: { ...prev.state, [key]: true }, store: { ...prev.store, [key]: dataJson } };
     });
   };
 
@@ -87,8 +82,8 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     setState((prev) => {
       const updateState: TNeedsState = { ...prev };
       if (!updateState.state || !updateState.store) return updateState;
-      updateState.state.user = true;
-      updateState.store.user = { id: 1, username: '11', firstName: '111' };
+      updateState.state.user2 = true;
+      updateState.store.user2 = { id: 1, username: '11', firstName: '111' };
       return updateState;
     });
   };
@@ -99,6 +94,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     request,
     test,
     set,
+    st: () => state(),
     // status,
     // store,
     // errors,

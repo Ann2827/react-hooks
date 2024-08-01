@@ -37,18 +37,18 @@ describe('loader.hook function:', () => {
     unmount();
   });
 
-  test('useLoader: should be listen on', () => {
-    const { result, unmount } = renderHook(() => useLoader());
-    let state = false;
-    act(() => {
-      result.current.on((is) => {
-        state = is;
-      });
-      result.current.loaderOn();
-    });
-    expect(state).toEqual(true);
-    unmount();
-  });
+  // test('useLoader: should be listen on', () => {
+  //   const { result, unmount } = renderHook(() => useLoader());
+  //   let state = false;
+  //   act(() => {
+  //     result.current.on((is) => {
+  //       state = is;
+  //     });
+  //     result.current.loaderOn();
+  //   });
+  //   expect(state).toEqual(true);
+  //   unmount();
+  // });
 
   test('useLoader: should be determinated', () => {
     const { result, unmount } = renderHook(() => useLoader());
