@@ -1,6 +1,6 @@
 {
   "name": "library-react-hooks",
-  "version": "0.21.0",
+  "version": "0.23.0-alpha.2",
   "description": "React hooks library",
   "author": "Ann Bystrova <ann.bystrova96@mail.ru>",
   "license": "MIT",
@@ -44,8 +44,8 @@
     "t:store": "jest src/core/store/store.test.ts"
   },
   "peerDependencies": {
-    "react": ">=16.0.0",
-    "react-dom": ">=16.0.0"
+    "react": "16 || 17 || 18",
+    "react-dom": "16 || 17 || 18"
   },
   "devDependencies": {
     "@babel/plugin-transform-private-property-in-object": "^7.23.4",
