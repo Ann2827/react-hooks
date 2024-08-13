@@ -25,15 +25,29 @@ export type TNeedsState = {
   requests:
     | { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] }
     | null;
+  rules: <K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
+    args: TNeedsInitializeRulesArgs<K>,
+  ) => INeedsStoreConfig[K];
   // меняются
   store: INeedsStoreConfig | null;
   state: { [K in keyof INeedsStoreConfig]: boolean | null } | null;
+};
+
+export type TNeedsInitializeRulesArgs<K extends keyof INeedsStoreConfig> = {
+  request: K;
+  // response: THttpsResponseObj<unknown>;
+  response: Response;
+  dataJsonFormat: unknown;
+  args?: unknown;
 };
 
 type TNeedsInitialize = {
   settings: Partial<TNeedsState['settings']>;
   store: INeedsStoreConfig;
   requests: { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] };
+  rules: <K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
+    args: TNeedsInitializeRulesArgs<K>,
+  ) => INeedsStoreConfig[K];
 };
 
 export interface INeedsData {

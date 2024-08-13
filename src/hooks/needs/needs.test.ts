@@ -70,6 +70,16 @@ describe('needs.hook function:', () => {
         user: 'getUser3',
         sessions: ['getSessions', 'data'],
       },
+      rules: ({ request, response, dataJsonFormat, args }) => {
+        if (
+          request === 'sessions2' &&
+          dataJsonFormat &&
+          typeof dataJsonFormat === 'object' &&
+          'data' in dataJsonFormat
+        ) {
+          return { test: dataJsonFormat.data };
+        }
+      },
     });
   });
 

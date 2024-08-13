@@ -19,6 +19,9 @@ const initialState: TNeedsState = {
   store: null,
   requests: null,
   state: null,
+  rules: () => {
+    return;
+  },
 };
 
 // TODO: turn off messages for named requests from store in https settings and turn on their in this place
@@ -32,7 +35,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
 
   // Public
   const initialize: INeedsData['initialize'] = (initial): ReturnType<INeedsData['initialize']> => {
-    const { settings, store, requests } = initial;
+    const { settings, store, requests, rules } = initial;
     setState((prev) => {
       const updateState: TNeedsState = { ...prev };
       if (store) {
@@ -44,6 +47,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
       }
       if (requests) updateState.requests = { ...requests };
       if (settings) updateState.settings = { ...prev.settings, ...settings };
+      if (rules) updateState.rules = rules;
       return updateState;
     });
     // console.log('!!!!!!!!', state());
@@ -65,7 +69,10 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
         (prev: unknown, item: string) => (isObject(prev) && item in prev ? prev[item] : prev),
         dataJson,
       );
-      updateSuccessData(key, dataJsonFormat);
+      const withRules = state().rules({ request: key, response, dataJsonFormat, args });
+      if (withRules) {
+        updateSuccessData(key, withRules);
+      } else updateSuccessData(key, dataJsonFormat);
     } else {
       setState((prev) => ({ ...prev, state: prev.state ? { ...prev.state, [key]: false } : null }));
     }
