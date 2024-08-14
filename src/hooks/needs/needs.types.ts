@@ -50,12 +50,22 @@ type TNeedsInitialize = {
   ) => INeedsStoreConfig[K];
 };
 
+export enum NeedsActionTypes {
+  refresh = 'refresh',
+  merge = 'merge',
+}
+
 export interface INeedsData {
   initialize(initial: Partial<TNeedsInitialize>): void;
+  /**
+   * @deprecated Use action(key, NeedsActionTypes.refresh, ...args)
+   */
   update(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
   request(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
-  test(): void;
   set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(key: K, dataJsonFormat: INeedsStoreConfig[K]): void;
+  action(key: keyof INeedsStoreConfig, type: NeedsActionTypes, ...args: any): Promise<void>;
+  // TODO: remove
+  test(): void;
   st: () => TNeedsState;
 }
 
