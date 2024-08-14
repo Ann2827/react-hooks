@@ -25,23 +25,47 @@ export type TNeedsState = {
   requests:
     | { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] }
     | null;
+  rules: <K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
+    args: TNeedsInitializeRulesArgs<K>,
+  ) => INeedsStoreConfig[K];
   // меняются
   store: INeedsStoreConfig | null;
   state: { [K in keyof INeedsStoreConfig]: boolean | null } | null;
+};
+
+export type TNeedsInitializeRulesArgs<K extends keyof INeedsStoreConfig> = {
+  request: K;
+  // response: THttpsResponseObj<unknown>;
+  response: Response;
+  dataJsonFormat: unknown;
+  args?: unknown;
 };
 
 type TNeedsInitialize = {
   settings: Partial<TNeedsState['settings']>;
   store: INeedsStoreConfig;
   requests: { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] };
+  rules: <K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
+    args: TNeedsInitializeRulesArgs<K>,
+  ) => INeedsStoreConfig[K];
 };
+
+export enum NeedsActionTypes {
+  refresh = 'refresh',
+  merge = 'merge',
+}
 
 export interface INeedsData {
   initialize(initial: Partial<TNeedsInitialize>): void;
+  /**
+   * @deprecated Use action(key, NeedsActionTypes.refresh, ...args)
+   */
   update(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
   request(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
-  test(): void;
   set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(key: K, dataJsonFormat: INeedsStoreConfig[K]): void;
+  action(key: keyof INeedsStoreConfig, type: NeedsActionTypes, ...args: any): Promise<void>;
+  // TODO: remove
+  test(): void;
   st: () => TNeedsState;
 }
 

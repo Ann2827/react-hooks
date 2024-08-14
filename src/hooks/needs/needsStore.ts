@@ -3,7 +3,7 @@ import { isObject, loggerMessage } from '@utils';
 
 import { HttpsStore } from '../https';
 
-import { TNeedsState, INeedsData, INeedsStoreConfig } from './needs.types';
+import { TNeedsState, INeedsData, INeedsStoreConfig, NeedsActionTypes } from './needs.types';
 
 const dataOptions = {
   hookName: 'needs',
@@ -19,6 +19,9 @@ const initialState: TNeedsState = {
   store: null,
   requests: null,
   state: null,
+  rules: () => {
+    return;
+  },
 };
 
 // TODO: turn off messages for named requests from store in https settings and turn on their in this place
@@ -29,10 +32,27 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
       return { ...prev, state: { ...prev.state, [key]: true }, store: { ...prev.store, [key]: dataJson } };
     });
   };
+  const mergeSuccessData = <T extends keyof INeedsStoreConfig>(key: T, dataJson: INeedsStoreConfig[T]): void => {
+    setState((prev) => {
+      return {
+        ...prev,
+        state: { ...prev.state, [key]: true },
+        store: {
+          ...prev.store,
+          [key]:
+            prev.store?.[key] && typeof prev.store[key] === 'object' && typeof dataJson === 'object'
+              ? Object.assign({}, prev.store?.[key], dataJson)
+              : prev.store?.[key] && Array.isArray(prev.store[key]) && Array.isArray(dataJson)
+                ? prev.store?.[key].concat(dataJson)
+                : dataJson,
+        },
+      };
+    });
+  };
 
   // Public
   const initialize: INeedsData['initialize'] = (initial): ReturnType<INeedsData['initialize']> => {
-    const { settings, store, requests } = initial;
+    const { settings, store, requests, rules } = initial;
     setState((prev) => {
       const updateState: TNeedsState = { ...prev };
       if (store) {
@@ -44,12 +64,13 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
       }
       if (requests) updateState.requests = { ...requests };
       if (settings) updateState.settings = { ...prev.settings, ...settings };
+      if (rules) updateState.rules = rules;
       return updateState;
     });
     // console.log('!!!!!!!!', state());
     if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
   };
-  const update: INeedsData['update'] = async (key, ...args): ReturnType<INeedsData['update']> => {
+  const action: INeedsData['action'] = async (key, type, ...args): ReturnType<INeedsData['action']> => {
     const requestData = state().requests?.[key];
     const [requestName, ...path] = Array.isArray(requestData) ? requestData : [requestData];
 
@@ -65,14 +86,24 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
         (prev: unknown, item: string) => (isObject(prev) && item in prev ? prev[item] : prev),
         dataJson,
       );
-      updateSuccessData(key, dataJsonFormat);
+      const dataJsonWithRules = state().rules({ request: key, response, dataJsonFormat, args });
+
+      if (type === NeedsActionTypes.merge) {
+        mergeSuccessData(key, dataJsonWithRules || dataJsonFormat);
+        return;
+      }
+
+      updateSuccessData(key, dataJsonWithRules || dataJsonFormat);
     } else {
       setState((prev) => ({ ...prev, state: prev.state ? { ...prev.state, [key]: false } : null }));
     }
   };
   const request: INeedsData['request'] = async (key, ...args): ReturnType<INeedsData['request']> => {
     if (state().state?.[key]) return;
-    await update(key, ...args);
+    await action(key, NeedsActionTypes.refresh, ...args);
+  };
+  const update: INeedsData['update'] = async (key, ...args): ReturnType<INeedsData['update']> => {
+    await action(key, NeedsActionTypes.refresh, ...args);
   };
   const set: INeedsData['set'] = (key, dataJsonFormat): ReturnType<INeedsData['set']> => {
     updateSuccessData(key, dataJsonFormat);
@@ -95,6 +126,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     test,
     set,
     st: () => state(),
+    action,
     // status,
     // store,
     // errors,

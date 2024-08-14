@@ -84,6 +84,7 @@
     "unicorn/expiring-todo-comments": 0,
     // Временно отключаю
     "@typescript-eslint/ban-types": 0,
-    "@typescript-eslint/no-namespace": 0
+    "@typescript-eslint/no-namespace": 0,
+    "unicorn/prefer-spread": 0,
   }
 }
