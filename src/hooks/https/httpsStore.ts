@@ -3,6 +3,7 @@ import { loggerData, loggerMessage } from '@utils';
 
 import { LoaderStore } from '../loader';
 import { MessagesStore } from '../messages';
+import { NotificationsStore } from '../notifications';
 
 import {
   IHttpsData,
@@ -163,7 +164,12 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
 
     updateStatusRequest(statusKey, { value: 'stop', code: response.status });
     if (withLoader) LoaderStore.determinate();
-    if (withMessages) MessagesStore.parse(response, dataJson);
+    if (withMessages) {
+      const messageData = MessagesStore.parse(response, dataJson);
+      if (messageData) {
+        NotificationsStore.send({ data: messageData[0], type: messageData[1], response });
+      }
+    }
     if (dataOptions.logger)
       loggerData(dataOptions.hookName!, [
         { message: `Requested ${statusKey}.` },
