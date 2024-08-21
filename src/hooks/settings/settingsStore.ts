@@ -6,6 +6,7 @@ import { logsImagePreloaderEnable } from '../imagePreloader/data';
 import HttpsStore, { logsHttpsEnable } from '../https/httpsStore';
 import MessagesStore, { logsMessagesEnable } from '../messages/messagesStore';
 import NeedsStore, { logsNeedsEnable } from '../needs/needsStore';
+import NotificationsStore, { logsNotificationsEnable } from '../notifications/notificationsStore';
 
 import { TSettingsState, ISettingsData } from './settings.types';
 
@@ -25,7 +26,7 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
       setState(initState);
 
       if (logger) {
-        [SettingsStore, LoaderStore, HttpsStore, MessagesStore, NeedsStore].forEach((item) => {
+        [SettingsStore, LoaderStore, HttpsStore, MessagesStore, NeedsStore, NotificationsStore].forEach((item) => {
           item.logs(true);
         });
         logsSettingsEnable();
@@ -34,6 +35,7 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
         logsMessagesEnable();
         logsNeedsEnable();
         logsImagePreloaderEnable();
+        logsNotificationsEnable();
       }
       if (dataOptions.logger) loggerMessage(dataOptions.hookName, 'Was initialized', state());
     };

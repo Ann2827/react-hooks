@@ -41,7 +41,8 @@
     "test:old": "cross-env CI=1 craco test --env=jsdom",
     "t:needs": "jest src/hooks/needs/needs.test.ts",
     "t:https": "jest src/hooks/https/https.test.ts",
-    "t:store": "jest src/core/store/store.test.ts"
+    "t:store": "jest src/core/store/store.test.ts",
+    "t:mes": "jest src/hooks/messages/messages.test.ts"
   },
   "peerDependencies": {
     "react": "16 || 17 || 18",
