@@ -31,6 +31,7 @@ export type TNeedsState = {
   // меняются
   store: INeedsStoreConfig | null;
   state: { [K in keyof INeedsStoreConfig]: boolean | null } | null;
+  response: { [K in keyof INeedsStoreConfig]: Response | null } | null;
 };
 
 export type TNeedsInitializeRulesArgs<K extends keyof INeedsStoreConfig> = {

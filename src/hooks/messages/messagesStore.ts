@@ -1,4 +1,5 @@
 import { makeStore } from '@core';
+import { loggerMessage } from '@utils';
 
 import type { TMessagesState, IMessagesData } from './messages.types';
 
@@ -23,6 +24,7 @@ const MessagesStore = makeStore<TMessagesState>(initialState, dataOptions).enric
         ...prev,
         codes: codes ? { ...prev.codes, ...codes } : prev.codes,
       }));
+      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
     };
 
     const parse: IMessagesData['parse'] = (response, _dataJson): ReturnType<IMessagesData['parse']> => {
