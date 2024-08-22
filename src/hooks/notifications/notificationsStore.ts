@@ -1,4 +1,5 @@
 import { makeStore } from '@core';
+import { loggerMessage } from '@utils';
 
 import TimerStore from '../timer/timerStore';
 
@@ -25,6 +26,7 @@ const NotificationsStore = makeStore<TNotificationsState>(initialState, dataOpti
         ...prev,
         settings: settings ? { ...prev.settings, ...settings } : prev.settings,
       }));
+      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
     };
 
     const drop: INotificationsData['drop'] = (id): ReturnType<INotificationsData['drop']> => {
