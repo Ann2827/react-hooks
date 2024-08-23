@@ -108,7 +108,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     }
   };
   const request: INeedsData['request'] = async (key, ...args): ReturnType<INeedsData['request']> => {
-    if (state().state?.[key]) return;
+    if (state().state?.[key] !== null) return;
     await action(key, NeedsActionTypes.refresh, ...args);
   };
   const update: INeedsData['update'] = async (key, ...args): ReturnType<INeedsData['update']> => {
