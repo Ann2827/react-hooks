@@ -4,6 +4,7 @@ import { loggerData, loggerMessage } from '@utils';
 import { LoaderStore } from '../loader';
 import { MessagesStore } from '../messages';
 import { NotificationsStore } from '../notifications';
+import { CacheStore } from '../cache';
 
 import {
   IHttpsData,
@@ -39,7 +40,7 @@ export const logsHttpsEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: THttpsState = {
-  settings: { loader: false, messages: false, mockMode: false, waitToken: false },
+  settings: { loader: false, messages: false, mockMode: false, waitToken: false, cache: { token: {} } },
   namedRequests: null,
   status: { request: {}, named: {} },
   tokens: null,
@@ -113,7 +114,18 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
     waitToken: boolean,
   ): Promise<IHttpsToken | undefined> => {
     const generalToken = state().tokens?.[tokenName];
+    const tokenCacheName = `token-${tokenName}`;
+    const tokenCacheAge = state().settings.cache.token[tokenName];
 
+    if (generalToken && !generalToken?.token && tokenCacheAge) {
+      const cache = CacheStore.getCache<{ [K in string]: { token: string } | null }>({ [tokenCacheName]: null });
+      const token: string | undefined = cache?.[tokenCacheName]?.token;
+      if (token) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        setToken(tokenName, token);
+        return { token, tokenTemplate: generalToken?.tokenTemplate };
+      }
+    }
     if ((!generalToken || !generalToken?.token) && !waitToken) return;
 
     if (!generalToken || !generalToken?.token) {
@@ -211,6 +223,10 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       if (!tokens || !(name in tokens)) return prev;
       return { ...prev, tokens: { ...tokens, [name]: { ...tokens[name], token: value } } };
     });
+    const tokenCacheAge = state().settings.cache.token?.[name as IHttpsTokenNames['names']];
+    if (tokenCacheAge) {
+      CacheStore.setCache([{ key: `token-${name}`, maxAge: tokenCacheAge, value: { token: value } }]);
+    }
   };
 
   const request = async <T>(

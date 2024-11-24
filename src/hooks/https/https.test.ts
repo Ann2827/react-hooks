@@ -2,13 +2,15 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import mockResponse from '../../../__mocks__/response';
 import mockFetch from '../../../__mocks__/fetch';
+import mockStorage from '../../../__mocks__/storage';
+import { CacheStore } from '../cache';
 
 import { useHttps, HttpsStore, IHttpsRequest } from '.';
 
 type TError = { errorCode: number } | { _meta: Record<string, unknown> };
 declare module '..' {
   interface IHttpsTokenNames {
-    names: 'main' | 'second';
+    names: 'main' | 'second' | 'third';
   }
   interface IHttpsMockNames {
     names: 'scenario1' | 'scenario2' | 'scenario3';
@@ -16,23 +18,27 @@ declare module '..' {
   interface IHttpsRequestsConfig {
     getUser: [
       (arg: { id: number; mockName: IHttpsMockNames['names'] }) => IHttpsRequest,
-      { data: { name: string } } | TError,
+      { data: { userId: string } } | TError,
     ];
     getUser3: [() => IHttpsRequest, { data: { name: string } } | TError];
+    getList: [() => IHttpsRequest, { data: [] }];
   }
 }
 
 describe('https HttpsStore:', () => {
   let restoreResponse: () => void;
   let restoreFetch: () => void;
+  let restoreStorage: () => void;
   beforeAll(() => {
     restoreResponse = mockResponse();
     restoreFetch = mockFetch();
+    restoreStorage = mockStorage();
     HttpsStore.initialize({
-      settings: { loader: true, messages: true, mockMode: true, waitToken: true },
+      settings: { loader: true, messages: true, mockMode: true, waitToken: true, cache: { token: { third: 10 } } },
       tokens: {
         main: 'bearer',
         second: 'x-auth:Bearer ${token}',
+        third: 'bearer',
         // test: '123',
       },
       // TODO: add settings response when fetch was catch
@@ -49,6 +55,10 @@ describe('https HttpsStore:', () => {
           query: { id: 3 },
           token: 'ssss',
         }),
+        getList: (): IHttpsRequest => ({
+          url: 'https://test.com/list',
+          tokenName: 'third',
+        }),
       },
       mocks: {
         // TODO: может позже добавлю настройки моков типо delay, allowReal
@@ -58,6 +68,9 @@ describe('https HttpsStore:', () => {
           },
           getUser3: {
             body: { userId: 3 },
+          },
+          getList: {
+            body: { data: [] },
           },
         },
         // TODO: scenarios: {},
@@ -72,12 +85,15 @@ describe('https HttpsStore:', () => {
     });
     HttpsStore.setToken('main', '123');
     HttpsStore.setToken('second', '123');
+    CacheStore.setCache([{ key: 'token-third', maxAge: 10, value: { token: '123' } }]);
   });
 
   afterAll(() => {
     restoreResponse();
     restoreFetch();
+    restoreStorage();
     HttpsStore.reset();
+    CacheStore.reset();
   });
 
   test('namedRequest: getUser should be success', async () => {
@@ -106,6 +122,12 @@ describe('https HttpsStore:', () => {
   test('request: with mockName should be success', async () => {
     const { dataJson } = await HttpsStore.request('https://test.com/3', { mockName: 'scenario3' });
     expect(dataJson).toEqual({ scenario3: true });
+  });
+
+  test('namedRequest: getSessions with cached token third', async () => {
+    const { response, dataJson } = await HttpsStore.namedRequest('getList');
+    expect(dataJson).toEqual({ data: [] });
+    expect(response?.status).toEqual(200);
   });
 });
 
