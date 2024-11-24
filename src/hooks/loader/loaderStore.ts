@@ -5,6 +5,7 @@ import { TLoaderState, ILoaderData } from './loader.types';
 const dataOptions = {
   hookName: 'loader',
   logger: false,
+  cleanKeys: false,
 };
 export const logsLoaderEnable = (): void => {
   dataOptions.logger = true;

@@ -1,7 +1,8 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useNeeds, NeedsStore, IHttpsRequest, HttpsStore } from '..';
+import { useNeeds, NeedsStore, IHttpsRequest, HttpsStore, CacheStore } from '..';
 import mockResponse from '../../../__mocks__/response';
+import mockStorage from '../../../__mocks__/storage';
 
 declare module '..' {
   interface INeedsStoreConfig {
@@ -9,6 +10,7 @@ declare module '..' {
       id: number | null;
     };
     sessions: null | [];
+    cache: { id: number } | null;
   }
   // TODO: не работает
   interface IHttpsRequestsConfig {
@@ -18,8 +20,10 @@ declare module '..' {
 
 describe('needs.hook function:', () => {
   let restoreResponse: () => void;
+  let restoreStorage: () => void;
   beforeAll(() => {
     restoreResponse = mockResponse();
+    restoreStorage = mockStorage();
     HttpsStore.initialize({
       settings: { mockMode: true, waitToken: true },
       tokens: {
@@ -58,17 +62,20 @@ describe('needs.hook function:', () => {
     HttpsStore.setToken('main', '123');
 
     NeedsStore.initialize({
-      settings: { loader: true },
+      // TODO: add validate for cache and https
+      settings: { loader: true, cache: { cache: 10 } },
       store: {
         user: {
           id: null,
         },
         sessions: null,
+        cache: null,
       },
       // TODO: add validators
       requests: {
         user: 'getUser3',
         sessions: ['getSessions', 'data'],
+        cache: 'getUser3',
       },
       rules: ({ request, response, dataJsonFormat, args }) => {
         if (
@@ -85,14 +92,11 @@ describe('needs.hook function:', () => {
 
   afterAll(() => {
     restoreResponse();
+    restoreStorage();
     HttpsStore.reset();
     NeedsStore.reset();
+    CacheStore.reset();
   });
-
-  // beforeEach(() => {
-  //   const { result } = renderHook(() => useNeeds([]));
-  //   act(() => result.current.reset());
-  // });
 
   test('useNeeds: should make request', async () => {
     const { result, unmount, rerender } = renderHook(() => useNeeds(['user']));
@@ -121,6 +125,18 @@ describe('needs.hook function:', () => {
     });
 
     expect(user).toEqual({ id: 1 });
+    unmount();
+  });
+
+  test('useNeeds: should make restore cache', () => {
+    window.localStorage.setItem(
+      'cache-cache',
+      JSON.stringify({ maxAge: new Date(Date.now() + 1000 * 60 * 10), value: { id: 5 } }),
+    );
+    const { result, unmount } = renderHook(() => useNeeds(['cache']));
+
+    expect(result.current?.store?.cache).toEqual({ id: 5 });
+    window.localStorage.removeItem('cache-cache');
     unmount();
   });
 });

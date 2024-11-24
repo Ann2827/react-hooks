@@ -2,6 +2,7 @@ import { makeStore } from '@core';
 import { isObject, loggerMessage } from '@utils';
 
 import { HttpsStore } from '../https';
+import { CacheStore } from '../cache';
 
 import { TNeedsState, INeedsData, INeedsStoreConfig, NeedsActionTypes } from './needs.types';
 
@@ -15,7 +16,7 @@ export const logsNeedsEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: TNeedsState = {
-  settings: { loader: false },
+  settings: { loader: false, cache: {} },
   store: null,
   requests: null,
   state: null,
@@ -32,6 +33,8 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     setState((prev) => {
       return { ...prev, state: { ...prev.state, [key]: true }, store: { ...prev.store, [key]: dataJson } };
     });
+    if (state().settings.cache[key])
+      CacheStore.setCache([{ key: key.toString(), maxAge: state().settings.cache[key], value: dataJson }]);
   };
   const mergeSuccessData = <T extends keyof INeedsStoreConfig>(key: T, dataJson: INeedsStoreConfig[T]): void => {
     setState((prev) => {
@@ -49,6 +52,8 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
         },
       };
     });
+    if (state().settings.cache[key])
+      CacheStore.setCache([{ key: key.toString(), maxAge: state().settings.cache[key], value: state().store?.[key] }]);
   };
 
   // Public
@@ -72,14 +77,12 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
       if (rules) updateState.rules = rules;
       return updateState;
     });
-    // console.log('!!!!!!!!', state());
     if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
   };
   const action: INeedsData['action'] = async (key, type, ...args): ReturnType<INeedsData['action']> => {
     const requestData = state().requests?.[key];
     const [requestName, ...path] = Array.isArray(requestData) ? requestData : [requestData];
 
-    // console.log('state().requests', state().requests);
     if (!requestName) {
       loggerMessage(dataOptions.hookName!, 'namedRequest not found');
       return;
@@ -109,6 +112,15 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
   };
   const request: INeedsData['request'] = async (key, ...args): ReturnType<INeedsData['request']> => {
     if (state().state?.[key] !== null) return;
+    if (state().settings.cache[key]) {
+      const cache = CacheStore.getCache({
+        [key]: null,
+      });
+      if (cache[key]) {
+        updateSuccessData(key, cache[key]);
+        return;
+      }
+    }
     await action(key, NeedsActionTypes.refresh, ...args);
   };
   const update: INeedsData['update'] = async (key, ...args): ReturnType<INeedsData['update']> => {
@@ -117,22 +129,11 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
   const set: INeedsData['set'] = (key, dataJsonFormat): ReturnType<INeedsData['set']> => {
     updateSuccessData(key, dataJsonFormat);
   };
-  // TODO: remove
-  const test = () => {
-    setState((prev) => {
-      const updateState: TNeedsState = { ...prev };
-      if (!updateState.state || !updateState.store) return updateState;
-      updateState.state.user2 = true;
-      updateState.store.user2 = { id: 1, username: '11', firstName: '111' };
-      return updateState;
-    });
-  };
 
   return {
     initialize,
     update,
     request,
-    test,
     set,
     st: () => state(),
     action,
