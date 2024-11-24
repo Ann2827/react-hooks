@@ -29,6 +29,7 @@ const LoaderStore = makeStore<TLoaderState>(initialState, dataOptions).enrich<IL
     activate,
     determinate,
     stop,
+    st: () => state(),
   };
 });
 

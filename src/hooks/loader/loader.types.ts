@@ -16,6 +16,8 @@ export interface ILoaderData {
   activate(): void;
   determinate(): void;
   stop(): void;
+  // TODO: remove
+  st: () => TLoaderState;
 }
 
 export type TLoaderStore = TStoreEnrich<TLoaderState, ILoaderData>;
