@@ -1,3 +1,5 @@
+import { TCacheSettings } from '../cache/cache.types';
+
 import type { IStore, TStoreEnrich } from '@core';
 
 /**
@@ -79,6 +81,7 @@ export type THttpsSettings = {
   messages: boolean;
   waitToken: boolean;
   mockMode: boolean;
+  cache: { token: Partial<Record<IHttpsTokenNames['names'], TCacheSettings['maxAge']>> };
 };
 
 export interface IHttpsRequest extends Partial<IHttpsFetchOptions> {
