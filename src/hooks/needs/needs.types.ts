@@ -1,6 +1,8 @@
 import { IStore, TStoreEnrich } from '@core';
 import { IHttpsRequestsConfig } from '@hooks';
 
+import { TCacheSetData } from '../cache/cache.types';
+
 /**
  * Interfaces for rewrite
  * ==========================================
@@ -17,6 +19,7 @@ export interface INeedsStoreConfig extends Record<string, unknown> {}
 export type TNeedsSettings = {
   // TODO: реализовать
   loader: boolean;
+  cache: { [K in keyof INeedsStoreConfig]?: TCacheSetData['maxAge'] };
 };
 
 export type TNeedsState = {
@@ -66,7 +69,6 @@ export interface INeedsData {
   set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(key: K, dataJsonFormat: INeedsStoreConfig[K]): void;
   action(key: keyof INeedsStoreConfig, type: NeedsActionTypes, ...args: any): Promise<void>;
   // TODO: remove
-  test(): void;
   st: () => TNeedsState;
 }
 

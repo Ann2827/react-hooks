@@ -1,8 +1,8 @@
-import { makeStore } from '@core';
+import { IContextOptions, makeStore } from '@core';
 
 import { T{{ properCase name }}State, I{{ properCase name }}Data } from './{{ camelCase name }}.types';
 
-const dataOptions = {
+const dataOptions: Partial<IContextOptions> = {
   hookName: '{{ camelCase name }}',
   logger: false,
 };
