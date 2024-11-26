@@ -1,6 +1,23 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { useLoader } from '.';
+import { useLoader, LoaderStore } from '.';
+
+describe('loader.hook loaderStore:', () => {
+  beforeEach(() => {
+    const { result } = renderHook(() => useLoader());
+    act(() => result.current.reset());
+  });
+
+  test('useLoader: should be active', () => {
+    const { result, unmount } = renderHook(() => LoaderStore.useSubscribe((state) => state.active));
+    expect(result.current).toEqual(false);
+    act(() => {
+      LoaderStore.activate();
+    });
+    expect(result.current).toEqual(true);
+    unmount();
+  });
+});
 
 describe('loader.hook function:', () => {
   beforeEach(() => {

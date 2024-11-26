@@ -29,6 +29,7 @@ describe('needs.hook function:', () => {
       tokens: {
         main: 'bearer',
         second: '1111',
+        third: '123',
       },
       // TODO: add settings response when fetch was catch
       // TODO: add messages settings но не сюда, а по имени реквеста проверять в том хуке
@@ -131,7 +132,7 @@ describe('needs.hook function:', () => {
   test('useNeeds: should make restore cache', () => {
     window.localStorage.setItem(
       'cache-cache',
-      JSON.stringify({ maxAge: new Date(Date.now() + 1000 * 60 * 10), value: { id: 5 } }),
+      JSON.stringify({ maxAge: new Date(Date.now() + 1000 * 60 * 10).getTime(), value: { id: 5 } }),
     );
     const { result, unmount } = renderHook(() => useNeeds(['cache']));
 

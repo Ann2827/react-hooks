@@ -15,6 +15,7 @@ export interface IStoreBase<S extends TDataState> extends Object {
    */
   on: IContext<S>['on'];
   logs: IContext<S>['logs'];
+  state: IContext<S>['getState'];
 }
 export type TStoreEnrich<S extends TDataState = {}, D extends Object = {}> = IStoreBase<S> & TOnlyPublic<D>;
 export type TStoreEnrichMethods<S extends TDataState = {}> = {

@@ -23,6 +23,7 @@ import {
   THttpsStateStatusRequest,
   IHttpsResponseCatch,
   THttpsStatusNamedValue,
+  THttpsInitValidationFn,
 } from './https.types';
 import { makeCustomFetch, fetchDataHandle, makeMocksFn } from './functions';
 
@@ -44,6 +45,7 @@ const initialState: THttpsState = {
   namedRequests: null,
   status: { request: {}, named: {} },
   tokens: null,
+  validation: null,
   // customFetch: makeCustomFetch(() => {}, { mockDelay: MOCK_DELAY, realFallback: false, makeMock: false }),
   customFetch: window.fetch,
 };
@@ -144,10 +146,10 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
 
     return generalToken;
   };
-  const makeRequest = async <T>(
+  const makeRequest = async <K extends keyof IHttpsRequestsConfig>(
     data: { url: THttpsFetchInput; init?: RequestInit; options?: Partial<IHttpsFetchOptions> },
     settings: { statusKey: THttpsStatusKey; withLoader: boolean; withMessages: boolean },
-  ): Promise<Partial<THttpsResponseObj<T | IHttpsResponseCatch>>> => {
+  ): Promise<Partial<THttpsResponseObj<K>>> => {
     const { url, init, options } = data;
     const { statusKey, withLoader, withMessages } = settings;
 
@@ -157,7 +159,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
     if (withLoader) LoaderStore.activate();
 
     let response: Response;
-    let dataJson: T | IHttpsResponseCatch;
+    let dataJson: K | IHttpsResponseCatch;
     const fetchData = fetchDataHandle(url, init, options);
     try {
       response = await state().customFetch(...fetchData, {
@@ -183,18 +185,20 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       }
     }
     if (dataOptions.logger)
-      loggerData(dataOptions.hookName!, [
-        { message: `Requested ${statusKey}.` },
+      loggerData(dataOptions.hookName!, `Requested ${statusKey}.`, [
         { message: 'Response:', data: response },
         { message: 'DataJSON:', data: dataJson },
       ]);
 
-    return { dataJson, response };
+    const validation: THttpsInitValidationFn<Exclude<K, string>> | undefined =
+      state().validation?.[statusKey as Exclude<K, string>];
+
+    return { dataJson, response, validation };
   };
 
   // Public
   const initialize: IHttpsData['initialize'] = (initial): ReturnType<IHttpsData['initialize']> => {
-    const { settings, tokens, namedRequests, mocks } = initial;
+    const { settings, tokens, namedRequests, mocks, validation } = initial;
     setState((prev) => {
       const update: THttpsState = { ...prev };
       if (tokens)
@@ -204,6 +208,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
           >(([name, template]) => [name, { token: null, tokenTemplate: template }]),
         ) as THttpsStateTokens;
       if (namedRequests) update.namedRequests = { ...namedRequests };
+      if (validation) update.validation = { ...validation };
       if (settings) {
         update.settings = { ...prev.settings, ...settings };
       }
@@ -229,15 +234,15 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
     }
   };
 
-  const request = async <T>(
+  const request = async <K extends keyof IHttpsRequestsConfig>(
     url: THttpsFetchInput,
     data: THttpsRequestData = {},
-  ): Promise<Partial<THttpsResponseObj<T | IHttpsResponseCatch>>> => {
+  ): Promise<Partial<THttpsResponseObj<K>>> => {
     const { query, body, token, tokenTemplate, init, settings, mockName } = data;
     const requestData = { url, init, options: { query, body, token, tokenTemplate, mockName } };
     const generalSettings = state().settings;
 
-    return makeRequest<T>(requestData, {
+    return makeRequest<K>(requestData, {
       statusKey: url,
       withLoader: settings?.loader ?? generalSettings.loader,
       withMessages: settings?.messages ?? generalSettings.messages,

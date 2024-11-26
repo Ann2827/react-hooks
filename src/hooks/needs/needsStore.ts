@@ -117,6 +117,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
         [key]: null,
       });
       if (cache[key]) {
+        if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Restored from cache', cache[key]);
         updateSuccessData(key, cache[key]);
         return;
       }

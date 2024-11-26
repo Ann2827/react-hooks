@@ -13,8 +13,8 @@ const useNeeds = (needs: TNeedsArgs): INeeds => {
   const update = React.useCallback<INeeds['update']>(NeedsStore.update, []);
   const set = React.useCallback<INeeds['set']>(NeedsStore.set, []);
 
-  const [state, setState] = React.useState<TNeedsState['state']>(NeedsStore.st().state);
-  const [store, setStore] = React.useState<TNeedsState['store']>(NeedsStore.st().store);
+  const [state, setState] = React.useState<TNeedsState['state']>(NeedsStore.state().state);
+  const [store, setStore] = React.useState<TNeedsState['store']>(NeedsStore.state().store);
   React.useEffect(() => {
     const clean = NeedsStore.on((_prev, next) => {
       setState(next.state);
