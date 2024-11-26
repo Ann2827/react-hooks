@@ -283,6 +283,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       updateStatusNamed(name);
       if (!tokenByName) {
         console.error(`Request by name: ${name}. Token by name: ${tokenName} not found`);
+        if (withLoader) LoaderStore.determinate();
         return {};
       }
 
