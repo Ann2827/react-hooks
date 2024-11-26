@@ -5,7 +5,7 @@ import { act } from '@testing-library/react-hooks';
 import mockConsole from '../../../__mocks__/console';
 
 import createContext, { CreateContext } from './context.functions';
-import { IContext, TContextFn } from './context.types';
+import { IContext } from './context.types';
 
 describe('context CreateContext class:', () => {
   type TState = {
@@ -31,11 +31,11 @@ describe('context CreateContext class:', () => {
 
   test('should work test method', () => {
     expect(KeysContext._test<TState>('state')).toEqual(initialState);
-    expect(KeysContext._test<Array<TContextFn<TState>>>('listeners')).toEqual([]);
+    expect(KeysContext.listeners).toEqual([]);
   });
 
   test('should update state', () => {
-    expect(KeysContext._test<Array<TContextFn<TState>>>('listeners')).toEqual([]);
+    expect(KeysContext.listeners).toEqual([]);
     expect(KeysContext.state).toEqual(initialState);
 
     // @ts-ignore
@@ -45,7 +45,7 @@ describe('context CreateContext class:', () => {
         on = [prev, next];
       });
     });
-    expect(KeysContext._test<Array<TContextFn<TState>>>('listeners')?.length).toEqual(1);
+    expect(KeysContext.listeners.length).toEqual(1);
     expect(on.length).toEqual(0);
 
     const state1 = { key1: '1', key2: '' };
@@ -76,7 +76,7 @@ describe('context CreateContext class:', () => {
       });
       KeysContext.state = state3;
     });
-    expect(KeysContext._test<Array<TContextFn<TState>>>('listeners')?.length).toEqual(2);
+    expect(KeysContext.listeners.length).toEqual(2);
     expect(beCalled).toEqual(false);
   });
 

@@ -15,12 +15,15 @@ describe('makeSubscribe hook:', () => {
   });
 
   test('should subscribe', () => {
-    const { result, unmount } = renderHook(() => useSubscribe<number>((state) => state.counter));
-    expect(result.current).toEqual(0);
     act(() => {
       CounterContext.state = { counter: 1 };
     });
+    const { result, unmount } = renderHook(() => useSubscribe<number>((state) => state.counter));
     expect(result.current).toEqual(1);
+    act(() => {
+      CounterContext.state = { counter: 2 };
+    });
+    expect(result.current).toEqual(2);
     unmount();
   });
 });
@@ -113,7 +116,7 @@ describe('makeStore hook:', () => {
 
   test('should be available methods', () => {
     expect(Object.keys(CounterStore).sort()).toEqual(
-      ['setCounter', 'reset', 'useSubscribe', 'setState', 'on', 'getState', 'wait', 'logs'].sort(),
+      ['setCounter', 'reset', 'useSubscribe', 'setState', 'on', 'getState', 'wait', 'logs', 'state'].sort(),
     );
   });
 

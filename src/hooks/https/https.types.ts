@@ -7,7 +7,7 @@ import type { IStore, TStoreEnrich } from '@core';
  * ==========================================
  */
 
-type THttpsRequestsConfig = Record<string, [(arg?: any) => IHttpsRequest, any]>;
+type THttpsRequestsConfig = Record<string, [(arg?: any) => IHttpsRequest, any, any?]>;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IHttpsRequestsConfig extends THttpsRequestsConfig {}
 
@@ -28,7 +28,15 @@ export type THttpsStatusNamedValue = 'waitToken';
 export type THttpsStatusKey = keyof IHttpsRequestsConfig | THttpsFetchInput;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IHttpsResponseCatch extends Record<string, unknown> {}
-export type THttpsResponseObj<T> = { response: Response; dataJson: T | IHttpsResponseCatch };
+export type THttpsInitValidationFn<K extends keyof IHttpsRequestsConfig> = (
+  dataJson: unknown,
+  response?: Response,
+) => dataJson is IHttpsRequestsConfig[K][1];
+export type THttpsResponseObj<K extends keyof IHttpsRequestsConfig, C extends IHttpsResponseCatch = {}> = {
+  response: Response;
+  dataJson: IHttpsRequestsConfig[K][1] | IHttpsRequestsConfig[K][2] | C;
+  validation?: THttpsInitValidationFn<K>;
+};
 /**
  * 'bearer' = template "Authorization:Bearer ${token}"
  * Example custom template: "x-auth:Bearer ${token}"
@@ -96,10 +104,13 @@ export interface IHttpsRequest extends Partial<IHttpsFetchOptions> {
 type THttpsInitRequests = {
   [K in keyof IHttpsRequestsConfig]: IHttpsRequestsConfig[K][0];
 };
+type THttpsInitValidation = {
+  [K in keyof IHttpsRequestsConfig]?: THttpsInitValidationFn<K>;
+};
 type THttpsNamedRequest = <K extends keyof IHttpsRequestsConfig>(
   name: K,
   ...arg: Parameters<IHttpsRequestsConfig[K][0]>
-) => Promise<Partial<THttpsResponseObj<IHttpsRequestsConfig[K][1]>>>;
+) => Promise<Partial<THttpsResponseObj<K>>>;
 export type THttpsRequestData = IHttpsFetchOptions & {
   init?: RequestInit;
   settings?: Partial<Omit<THttpsSettings, 'mockMode' | 'waitToken'>>;
@@ -117,6 +128,7 @@ export type THttpsState = {
   // постоянные после инита
   settings: THttpsSettings;
   namedRequests: THttpsInitRequests | null;
+  validation: THttpsInitValidation | null;
   customFetch: TCustomFetch;
   // меняются
   tokens: THttpsStateTokens | null;
@@ -143,16 +155,17 @@ type THttpsInitialize = {
    */
   tokens: Record<IHttpsTokenNames['names'], THttpsTokenTemplate>;
   namedRequests: THttpsInitRequests;
+  validation: THttpsInitValidation;
   mocks: THttpsMockConfig;
 };
 
 export interface IHttpsData {
   initialize(initial: Partial<THttpsInitialize>): void;
   setToken(name: IHttpsTokenNames['names'], value: THttpsTokenValue): void;
-  request<T>(
+  request<K extends keyof IHttpsRequestsConfig>(
     url: THttpsFetchInput,
     data?: THttpsRequestData,
-  ): Promise<Partial<THttpsResponseObj<T | IHttpsResponseCatch>>>;
+  ): Promise<Partial<THttpsResponseObj<K, IHttpsResponseCatch>>>;
   namedRequest: THttpsNamedRequest;
 }
 

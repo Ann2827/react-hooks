@@ -1,3 +1,5 @@
+import { isObject } from '@utils';
+
 export const arrToStr = (arr?: string[] | string, splitter = ', '): string => {
   if (!arr) return '';
   if (typeof arr === 'string') return arr;
@@ -27,16 +29,6 @@ export const onlyPublic = <T extends Record<string, unknown>>(obj: T): TOnlyPubl
     if (typeof key === 'string' && key[0] === '_') delete updateObj[key];
   });
   return updateObj;
-};
-
-export const isObject = (obj: any): obj is Obj => {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    (Object.keys(obj) as Array<keyof typeof obj>).every(
-      (key) => typeof key === 'string' || typeof key === 'number' || typeof key === 'symbol',
-    )
-  );
 };
 
 export const cleanObjKeys = <T extends Object = Object, D = Partial<T>>(reference: T, dirty: D): D => {

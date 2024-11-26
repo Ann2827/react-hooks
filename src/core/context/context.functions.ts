@@ -48,7 +48,7 @@ export class CreateContext<S extends Object> implements IContext<S> {
   }
 
   get state(): S {
-    return this.#state;
+    return (() => this.#state)();
   }
 
   set state(newState) {
@@ -64,9 +64,8 @@ export class CreateContext<S extends Object> implements IContext<S> {
     if (JSON.stringify(cloneThisState) !== JSON.stringify(mergeNewState)) {
       this.#state = mergeNewState;
       this.#event(cloneThisState, mergeNewState);
-      // console.log('!!--state--!!', { ...mergeNewState });
 
-      if (logger) loggerState(hookName, cloneThisState, mergeNewState);
+      if (logger) loggerState(hookName, cloneThisState, mergeNewState, this.#listeners.length);
     }
   }
 
@@ -82,8 +81,13 @@ export class CreateContext<S extends Object> implements IContext<S> {
     if (logger) loggerMessage(hookName, 'Was reset');
   }
 
+  get listeners() {
+    return [...this.#listeners];
+  }
+
   _test<T>(method: string): T | undefined {
-    const methods: typeof this = Object.assign(this, { listeners: this.#listeners });
+    // const methods: typeof this = Object.assign(this, { listeners: this.#listeners });
+    const methods: typeof this = Object.assign(this);
     // @ts-ignore
     return method in methods ? (methods[method] as T) : undefined;
   }

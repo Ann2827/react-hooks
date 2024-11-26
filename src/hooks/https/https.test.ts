@@ -4,10 +4,12 @@ import mockResponse from '../../../__mocks__/response';
 import mockFetch from '../../../__mocks__/fetch';
 import mockStorage from '../../../__mocks__/storage';
 import { CacheStore } from '../cache';
+import { LoaderStore } from '../loader';
 
 import { useHttps, HttpsStore, IHttpsRequest } from '.';
 
 type TError = { errorCode: number } | { _meta: Record<string, unknown> };
+type TGetUserSuccess = { userId: string };
 declare module '..' {
   interface IHttpsTokenNames {
     names: 'main' | 'second' | 'third';
@@ -16,11 +18,8 @@ declare module '..' {
     names: 'scenario1' | 'scenario2' | 'scenario3';
   }
   interface IHttpsRequestsConfig {
-    getUser: [
-      (arg: { id: number; mockName: IHttpsMockNames['names'] }) => IHttpsRequest,
-      { data: { userId: string } } | TError,
-    ];
-    getUser3: [() => IHttpsRequest, { data: { name: string } } | TError];
+    getUser: [(arg: { id: number; mockName: IHttpsMockNames['names'] }) => IHttpsRequest, TGetUserSuccess, TError];
+    getUser3: [() => IHttpsRequest, { data: { name: string } }, TError];
     getList: [() => IHttpsRequest, { data: [] }];
   }
 }
@@ -60,6 +59,15 @@ describe('https HttpsStore:', () => {
           tokenName: 'third',
         }),
       },
+      validation: {
+        getUser: (dataJson, response): dataJson is TGetUserSuccess =>
+          !!response &&
+          response.ok &&
+          !!dataJson &&
+          typeof dataJson === 'object' &&
+          dataJson !== null &&
+          'userId' in dataJson,
+      },
       mocks: {
         // TODO: может позже добавлю настройки моков типо delay, allowReal
         namedRequests: {
@@ -88,6 +96,10 @@ describe('https HttpsStore:', () => {
     CacheStore.setCache([{ key: 'token-third', maxAge: 10, value: { token: '123' } }]);
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   type KeysStartingWith<Set, Needle extends string> = Set extends `${Needle}${infer _X}` ? Set : never;
+  // type PickByNotStartingWith<T, NotStartWith extends string> = Omit<T, KeysStartingWith<keyof T, NotStartWith>>;
+
   afterAll(() => {
     restoreResponse();
     restoreFetch();
@@ -97,8 +109,15 @@ describe('https HttpsStore:', () => {
   });
 
   test('namedRequest: getUser should be success', async () => {
-    const { response, dataJson } = await HttpsStore.namedRequest('getUser', { id: 4, mockName: 'scenario2' });
+    const { response, dataJson, validation } = await HttpsStore.namedRequest('getUser', {
+      id: 4,
+      mockName: 'scenario2',
+    });
     expect(dataJson).toEqual({ userId: 1 });
+    expect(validation?.(dataJson, response)).toEqual(true);
+    // if (validation?.(dataJson, response)) {
+    //   const r = dataJson.userId;
+    // }
     expect(response?.status).toEqual(200);
   });
 
@@ -128,6 +147,16 @@ describe('https HttpsStore:', () => {
     const { response, dataJson } = await HttpsStore.namedRequest('getList');
     expect(dataJson).toEqual({ data: [] });
     expect(response?.status).toEqual(200);
+  });
+
+  test('loader: should be active', async () => {
+    const { result, unmount } = renderHook(() => LoaderStore.useSubscribe((state) => state.active));
+    expect(result.current).toEqual(false);
+    act(() => {
+      HttpsStore.namedRequest('getUser', { id: 4, mockName: 'scenario2' });
+    });
+    expect(result.current).toEqual(true);
+    unmount();
   });
 });
 

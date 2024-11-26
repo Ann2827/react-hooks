@@ -1,4 +1,4 @@
-import { arrToStr, unflattenItem, unflatten, onlyPublic, cleanObjKeys, isObject, fillByArray } from './object';
+import { arrToStr, unflattenItem, unflatten, onlyPublic, cleanObjKeys, fillByArray } from './object';
 
 describe('utils object: fn:', () => {
   test('arrToStr should be passed', () => {
@@ -51,13 +51,6 @@ describe('utils object: fn:', () => {
     // @ts-ignore
     const result = cleanObjKeys(ref, { key1: '', key2: { key1: '' }, key9: '', key11: '' });
     expect(result).toEqual({ key1: '', key2: {}, key9: '' });
-  });
-
-  test('isObject', () => {
-    expect(isObject({ k: 1 })).toEqual(true);
-    expect(isObject(null)).toEqual(false);
-    expect(isObject('test')).toEqual(false);
-    expect(isObject(['test'])).toEqual(true);
   });
 
   test('fillByArray', () => {
