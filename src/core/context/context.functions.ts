@@ -29,6 +29,8 @@ export class CreateContext<S extends Object> implements IContext<S> {
     this.reset = this.reset.bind(this);
     this.getState = this.getState.bind(this);
     this.logs = this.logs.bind(this);
+    this.init = this.init.bind(this);
+    this.restart = this.restart.bind(this);
     if (typeof this._test === 'function') {
       this._test = this._test.bind(this);
     }
@@ -83,6 +85,17 @@ export class CreateContext<S extends Object> implements IContext<S> {
 
   get listeners() {
     return [...this.#listeners];
+  }
+
+  restart(): void {}
+
+  init(fn: (prev: S) => S) {
+    if (this.#options.logger) loggerMessage(this.#options.hookName, 'Was initialized');
+    this.state = fn(this.state);
+    this.restart = () => {
+      if (this.#options.logger) loggerMessage(this.#options.hookName, 'Was restarted');
+      fn(this.#initialState);
+    };
   }
 
   _test<T>(method: string): T | undefined {

@@ -41,4 +41,6 @@ export interface IContext<S extends Object> {
   getState(): S;
   logs(enable: boolean): void;
   get listeners(): Array<TContextFn<S>>;
+  init(fn: (prev: S) => S): void;
+  restart(): void;
 }

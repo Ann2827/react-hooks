@@ -1,5 +1,4 @@
 import { IContextOptions, makeStore } from '@core';
-import { loggerMessage } from '@utils';
 
 import { TCacheState, ICacheData, TCachePlace, TCacheAction } from './cache.types';
 
@@ -17,7 +16,7 @@ const initialState: TCacheState = {
 };
 
 const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICacheData>(
-  (setState, { state, reset }) => {
+  (setState, { state, reset, init }) => {
     // Private
     const checkPlace = (place: TCachePlace) => {
       let check = state().checks[place];
@@ -52,14 +51,13 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
     // Public
     const initialize: ICacheData['initialize'] = (initial): ReturnType<ICacheData['initialize']> => {
       const { settings } = initial;
-      setState((prev) => {
+      init((prev) => {
         const update: TCacheState = { ...prev };
         if (settings) {
           update.settings = { ...prev.settings, ...settings };
         }
         return update;
       });
-      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
     };
     // @ts-ignore
     const action: ICacheData['action'] = <T extends keyof TCacheAction>(

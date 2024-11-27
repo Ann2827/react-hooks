@@ -67,6 +67,7 @@ export const makeStore = <S extends TDataState = {}>(initialState: S, options: P
       state: BaseContext.getState,
       reset: BaseContext.reset,
       on: BaseContext.on,
+      init: BaseContext.init,
     });
 
     const filterMethods: TOnlyPublic<D> = onlyPublic<D>(enrichData);
@@ -78,6 +79,7 @@ export const makeStore = <S extends TDataState = {}>(initialState: S, options: P
       on: BaseContext.on,
       logs: BaseContext.logs,
       state: BaseContext.getState,
+      restart: BaseContext.restart,
       ...filterMethods,
     };
   };
@@ -90,5 +92,6 @@ export const makeStore = <S extends TDataState = {}>(initialState: S, options: P
     on: BaseContext.on,
     logs: BaseContext.logs,
     state: BaseContext.getState,
+    restart: BaseContext.restart,
   };
 };

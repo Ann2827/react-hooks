@@ -1,5 +1,4 @@
 import { makeStore } from '@core';
-import { loggerMessage } from '@utils';
 
 import LoaderStore, { logsLoaderEnable } from '../loader/loaderStore';
 import { logsImagePreloaderEnable } from '../imagePreloader/data';
@@ -21,10 +20,10 @@ export const logsSettingsEnable = (): void => {
 const initialState: TSettingsState = { logger: false };
 // TODO: logs only for some hooks
 const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enrich<ISettingsData>(
-  (setState, { state }) => {
+  (_setState, { state, init }) => {
     const initialize: ISettingsData['initialize'] = (initState): void => {
       const { logger } = initState;
-      setState(initState);
+      init(() => initState);
 
       if (logger) {
         [SettingsStore, LoaderStore, HttpsStore, MessagesStore, NeedsStore, NotificationsStore, CacheStore].forEach(
@@ -41,7 +40,6 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
         logsNotificationsEnable();
         logsCacheEnable();
       }
-      if (dataOptions.logger) loggerMessage(dataOptions.hookName, 'Was initialized', state());
     };
 
     return {

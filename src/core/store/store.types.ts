@@ -16,12 +16,14 @@ export interface IStoreBase<S extends TDataState> extends Object {
   on: IContext<S>['on'];
   logs: IContext<S>['logs'];
   state: IContext<S>['getState'];
+  restart: IContext<S>['restart'];
 }
 export type TStoreEnrich<S extends TDataState = {}, D extends Object = {}> = IStoreBase<S> & TOnlyPublic<D>;
 export type TStoreEnrichMethods<S extends TDataState = {}> = {
   state: () => S;
   reset: IContext<S>['reset'];
   on: IContext<S>['on'];
+  init: IContext<S>['init'];
 };
 export interface IStore<S extends TDataState = {}> extends IStoreBase<S> {
   enrich<D extends Record<string, any> = {}>(

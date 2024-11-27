@@ -1,5 +1,4 @@
 import { makeStore } from '@core';
-import { loggerMessage } from '@utils';
 
 import type { TMessagesState, IMessagesData } from './messages.types';
 
@@ -17,14 +16,13 @@ const initialState: TMessagesState = { codes: {} };
 // https://developer.mozilla.org/ru/docs/Web/HTTP/Status
 
 const MessagesStore = makeStore<TMessagesState>(initialState, dataOptions).enrich<IMessagesData>(
-  (setState, { state }) => {
+  (_setState, { state, init }) => {
     const initialize: IMessagesData['initialize'] = (initial): ReturnType<IMessagesData['initialize']> => {
       const { codes } = initial;
-      setState((prev) => ({
+      init((prev) => ({
         ...prev,
         codes: codes ? { ...prev.codes, ...codes } : prev.codes,
       }));
-      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
     };
 
     const parse: IMessagesData['parse'] = (response, _dataJson): ReturnType<IMessagesData['parse']> => {

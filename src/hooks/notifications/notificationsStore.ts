@@ -1,5 +1,4 @@
 import { makeStore } from '@core';
-import { loggerMessage } from '@utils';
 
 import TimerStore from '../timer/timerStore';
 
@@ -19,14 +18,13 @@ const initialState: TNotificationsState = {
 };
 
 const NotificationsStore = makeStore<TNotificationsState>(initialState, dataOptions).enrich<INotificationsData>(
-  (setState, { state }) => {
+  (setState, { state, init }) => {
     const initialize: INotificationsData['initialize'] = (initial): ReturnType<INotificationsData['initialize']> => {
       const { settings } = initial;
-      setState((prev) => ({
+      init((prev) => ({
         ...prev,
         settings: settings ? { ...prev.settings, ...settings } : prev.settings,
       }));
-      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Was initialized', state());
     };
 
     const drop: INotificationsData['drop'] = (id): ReturnType<INotificationsData['drop']> => {
