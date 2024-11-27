@@ -134,6 +134,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       if (dataOptions.logger) loggerMessage(dataOptions.hookName!, `Wait for token: ${tokenName}`);
 
       return new Promise<IHttpsToken>((resolve) => {
+        // TODO: добавить прерывание, токен может не прийти
         const clean = on((_prevState, newState) => {
           const awaitedToken = newState.tokens?.[tokenName];
           if (awaitedToken?.token) {
