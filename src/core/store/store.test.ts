@@ -116,7 +116,7 @@ describe('makeStore hook:', () => {
 
   test('should be available methods', () => {
     expect(Object.keys(CounterStore).sort()).toEqual(
-      ['setCounter', 'reset', 'useSubscribe', 'setState', 'on', 'getState', 'wait', 'logs', 'state'].sort(),
+      ['setCounter', 'reset', 'useSubscribe', 'setState', 'on', 'getState', 'wait', 'logs', 'state', 'restart'].sort(),
     );
   });
 

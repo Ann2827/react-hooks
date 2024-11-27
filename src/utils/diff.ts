@@ -1,4 +1,4 @@
-import { isObject, isArray, isBoolean, isNull, isNumber, isString, isUndefined, isFunction } from '@utils';
+import { isObject, isArray, isBoolean, isNull, isNumber, isString, isUndefined, isFunction } from './guards';
 
 type DataType = 'object' | 'number' | 'array' | 'boolean' | 'null' | 'string' | 'undefined' | 'function' | 'unknown';
 type DiffT = string | null | boolean | undefined;

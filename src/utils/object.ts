@@ -1,4 +1,4 @@
-import { isObject } from '@utils';
+import { isObject } from './guards';
 
 export const arrToStr = (arr?: string[] | string, splitter = ', '): string => {
   if (!arr) return '';
