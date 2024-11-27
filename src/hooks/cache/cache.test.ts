@@ -47,6 +47,17 @@ describe('cache.hook CacheStore:', () => {
     const value = CacheStore.getCache({ '1': null });
     expect(value).toEqual({ '1': 'test' });
   });
+
+  test('should resetCache in localStorage', () => {
+    global.localStorage.setItem('cache-1', JSON.stringify({ maxAge: null, value: 'test' }));
+    global.localStorage.setItem('cache-2', JSON.stringify({ maxAge: null, value: 'test' }));
+    global.localStorage.setItem('test', JSON.stringify({ maxAge: null, value: 'test' }));
+
+    CacheStore.resetCache();
+
+    expect(CacheStore.getCache({ '1': null })).toEqual({ '1': null });
+    expect(global.localStorage.getItem('test')).toBe(JSON.stringify({ maxAge: null, value: 'test' }));
+  });
 });
 
 // describe('cache.hook function:', () => {

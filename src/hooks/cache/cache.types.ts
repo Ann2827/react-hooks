@@ -1,7 +1,13 @@
 import { IStore, TStoreEnrich } from '@core';
 
 export type TCachePlace = 'localStorage';
-export type TCacheActionType = 'get' | 'set' | 'remove';
+export type TCacheAction = {
+  get: string | null;
+  set: void;
+  remove: void;
+  keys: string[];
+};
+export type TCacheActionType = keyof TCacheAction;
 
 export type TCacheSettings = {
   place: TCachePlace;
@@ -25,9 +31,10 @@ type TCacheInitialize = {
 
 export interface ICacheData {
   initialize(initial: Partial<TCacheInitialize>): void;
-  action(place: TCachePlace, type: TCacheActionType, key: string, value?: string): undefined | string | null | void;
+  action<T extends keyof TCacheAction>(place: TCachePlace, type: T, key: string, value?: string): TCacheAction[T];
   setCache(data: TCacheSetData[]): void;
   getCache<T extends object = Record<string, Record<string, unknown> | null>>(data: T): Partial<T>;
+  resetCache(): void;
 }
 
 export type TCacheStore = TStoreEnrich<TCacheState, ICacheData>;
