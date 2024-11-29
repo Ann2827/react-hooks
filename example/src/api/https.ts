@@ -20,8 +20,8 @@ declare module 'library-react-hooks' {
 HttpsStore.initialize({
   settings: { mockMode: true, waitToken: true },
   tokens: {
-    main: 'bearer',
-    second: 'x-auth:Bearer ${token}',
+    main: { template: 'bearer' },
+    second: { template: 'x-auth:Bearer ${token}' },
   },
   namedRequests: {
     getUser: ({ id, mockName }): IHttpsRequest => ({
