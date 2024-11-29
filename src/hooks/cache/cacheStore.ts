@@ -108,6 +108,13 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
       return cacheData;
     };
 
+    const removeCache: ICacheData['removeCache'] = (keys): ReturnType<ICacheData['removeCache']> => {
+      const { place, prefix } = state().settings;
+      keys.forEach((key) => {
+        action(place, 'remove', `${prefix}-${key}`);
+      });
+    };
+
     const resetCache: ICacheData['resetCache'] = (): ReturnType<ICacheData['resetCache']> => {
       const { place, prefix } = state().settings;
       const keys = action(place, 'keys', prefix);
@@ -122,6 +129,7 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
       action,
       setCache,
       getCache,
+      removeCache,
       resetCache,
     };
   },

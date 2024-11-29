@@ -16,9 +16,10 @@ export const logsNeedsEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: TNeedsState = {
-  settings: { loader: false, cache: {} },
+  settings: { loader: false },
   store: null,
   requests: null,
+  cache: null,
   state: null,
   rules: () => {
     return;
@@ -26,17 +27,27 @@ const initialState: TNeedsState = {
   response: null,
 };
 
+let httpsListener: () => void = () => {};
+
 // TODO: turn off messages for named requests from store in https settings and turn on their in this place
 const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INeedsData>((setState, { state, init }) => {
   // Private
-  const updateSuccessData = <T extends keyof INeedsStoreConfig>(key: T, dataJson: INeedsStoreConfig[T]): void => {
+  const updateSuccessData = <T extends keyof INeedsStoreConfig>(
+    key: T,
+    dataJson: INeedsStoreConfig[T],
+    cache = true,
+  ): void => {
     setState((prev) => {
       return { ...prev, state: { ...prev.state, [key]: true }, store: { ...prev.store, [key]: dataJson } };
     });
-    if (state().settings.cache[key])
-      CacheStore.setCache([{ key: key.toString(), maxAge: state().settings.cache[key], value: dataJson }]);
+    if (state().cache?.[key] && cache)
+      CacheStore.setCache([{ key: key.toString(), maxAge: state().cache?.[key]?.time, value: dataJson }]);
   };
-  const mergeSuccessData = <T extends keyof INeedsStoreConfig>(key: T, dataJson: INeedsStoreConfig[T]): void => {
+  const mergeSuccessData = <T extends keyof INeedsStoreConfig>(
+    key: T,
+    dataJson: INeedsStoreConfig[T],
+    cache = true,
+  ): void => {
     setState((prev) => {
       return {
         ...prev,
@@ -52,13 +63,13 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
         },
       };
     });
-    if (state().settings.cache[key])
-      CacheStore.setCache([{ key: key.toString(), maxAge: state().settings.cache[key], value: state().store?.[key] }]);
+    if (state().cache?.[key] && cache)
+      CacheStore.setCache([{ key: key.toString(), maxAge: state().cache?.[key]?.time, value: state().store?.[key] }]);
   };
 
   // Public
   const initialize: INeedsData['initialize'] = (initial): ReturnType<INeedsData['initialize']> => {
-    const { settings, store, requests, rules } = initial;
+    const { settings, store, requests, rules, cache } = initial;
     init((prev) => {
       const updateState: TNeedsState = { ...prev };
       if (store) {
@@ -72,9 +83,42 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
           return p !== null && typeof p === 'object' ? { ...p, [key]: null } : { [key]: null };
         }, null);
       }
-      if (requests) updateState.requests = { ...requests };
+      if (cache) {
+        updateState.cache = { ...cache };
+      }
       if (settings) updateState.settings = { ...prev.settings, ...settings };
       if (rules) updateState.rules = rules;
+      if (requests) {
+        updateState.requests = { ...requests };
+
+        httpsListener?.();
+        httpsListener = HttpsStore.on((_prevState, nextState, diffState) => {
+          // diffState: status.request.getUsersStat.value:pending -> status.request.getUsersStat.value:stop
+          diffState.forEach(([p, n]) => {
+            // TODO: Покрыть тестами и может вынести в переменную
+            if (!p.includes('value:pending') || !n.includes('value:stop')) return;
+
+            const cacheConfig = state()?.cache;
+            const requestName = p.split('.')[2];
+            const requestResult = nextState.status.request[requestName];
+            if (!cacheConfig || !requestResult?.response) return;
+
+            Object.entries(cacheConfig).forEach(([needsKey, cacheValue]) => {
+              const cacheValueResponse = cacheValue?.clean?.otherResponse;
+              if (cacheValueResponse?.which === 'token' && cacheValueResponse.token !== requestResult.tokenName) return;
+              if (
+                cacheValueResponse?.is === requestResult.response?.ok ||
+                (requestResult.response?.status &&
+                  Array.isArray(cacheValueResponse?.is) &&
+                  cacheValueResponse?.is.includes(requestResult.response.status))
+              ) {
+                CacheStore.removeCache([needsKey]);
+              }
+            });
+          });
+        });
+      }
+
       return updateState;
     });
   };
@@ -95,23 +139,37 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
       );
       const dataJsonWithRules = state().rules({ request: key, response, dataJsonFormat, args });
 
+      let needCache = true;
+      const thisResponseIs = state().cache?.[key]?.clean?.thisResponseIs;
+      if (thisResponseIs === true || (Array.isArray(thisResponseIs) && thisResponseIs.includes(response.status))) {
+        CacheStore.removeCache([key.toString()]);
+        needCache = false;
+      }
+
       if (type === NeedsActionTypes.merge) {
-        mergeSuccessData(key, dataJsonWithRules || dataJsonFormat);
+        mergeSuccessData(key, dataJsonWithRules || dataJsonFormat, needCache);
         return;
       }
 
-      updateSuccessData(key, dataJsonWithRules || dataJsonFormat);
+      updateSuccessData(key, dataJsonWithRules || dataJsonFormat, needCache);
     } else {
       setState((prev) => ({
         ...prev,
         state: prev.state ? { ...prev.state, [key]: false } : null,
         response: prev.response ? { ...prev.response, [key]: response || null } : null,
       }));
+      const thisResponseIs = state().cache?.[key]?.clean?.thisResponseIs;
+      if (
+        thisResponseIs === false ||
+        (response && Array.isArray(thisResponseIs) && thisResponseIs.includes(response.status))
+      ) {
+        CacheStore.removeCache([key.toString()]);
+      }
     }
   };
   const request: INeedsData['request'] = async (key, ...args): ReturnType<INeedsData['request']> => {
     if (state().state?.[key] !== null) return;
-    if (state().settings.cache[key]) {
+    if (state().cache?.[key]) {
       const cache = CacheStore.getCache({
         [key]: null,
       });

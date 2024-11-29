@@ -25,7 +25,7 @@ export type TCacheSetData = {
   value: any;
 };
 
-type TCacheInitialize = {
+export type TCacheInitialize = {
   settings: Partial<TCacheState['settings']>;
 };
 
@@ -34,6 +34,7 @@ export interface ICacheData {
   action<T extends keyof TCacheAction>(place: TCachePlace, type: T, key: string, value?: string): TCacheAction[T];
   setCache(data: TCacheSetData[]): void;
   getCache<T extends object = Record<string, Record<string, unknown> | null>>(data: T): Partial<T>;
+  removeCache(keys: string[]): void;
   resetCache(): void;
 }
 

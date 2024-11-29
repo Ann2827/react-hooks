@@ -62,7 +62,7 @@ export type TNotificationsState = {
   notifications: TNotificationsStateNotifications[];
 };
 
-type TNotificationsInitialize = {
+export type TNotificationsInitialize = {
   settings: Partial<TNotificationsState['settings']>;
 };
 

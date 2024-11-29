@@ -1,4 +1,4 @@
-import { loggerState, loggerMessage, cleanObjKeys } from '@utils';
+import { loggerState, loggerMessage, cleanObjKeys, diff } from '@utils';
 
 import type { IContext, IContextOptions, TContextFn } from './context.types';
 
@@ -36,8 +36,8 @@ export class CreateContext<S extends Object> implements IContext<S> {
     }
   }
 
-  #event(prevState: S, newState: S): void {
-    this.#listeners.forEach((listener) => listener(prevState, newState));
+  #event(prevState: S, newState: S, diffState: Array<[string, string]>): void {
+    this.#listeners.forEach((listener) => listener(prevState, newState, diffState));
   }
 
   public on(fn: TContextFn<S>): () => void {
@@ -62,12 +62,14 @@ export class CreateContext<S extends Object> implements IContext<S> {
     const mergeNewState: S = merge
       ? Object.assign({}, cloneThisState, cleanNewState)
       : Object.assign({}, cleanNewState);
+    const diffState = diff(cloneThisState, mergeNewState);
 
+    // TODO: может можно доверять условию на diffState?
     if (JSON.stringify(cloneThisState) !== JSON.stringify(mergeNewState)) {
       this.#state = mergeNewState;
-      this.#event(cloneThisState, mergeNewState);
+      this.#event(cloneThisState, mergeNewState, diffState);
 
-      if (logger) loggerState(hookName, cloneThisState, mergeNewState, this.#listeners.length);
+      if (logger) loggerState(hookName, cloneThisState, mergeNewState, diffState, this.#listeners.length);
     }
   }
 

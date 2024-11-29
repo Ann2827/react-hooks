@@ -27,9 +27,9 @@ describe('needs.hook function:', () => {
     HttpsStore.initialize({
       settings: { mockMode: true, waitToken: true },
       tokens: {
-        main: 'bearer',
-        second: '1111',
-        third: '123',
+        main: { template: 'bearer' },
+        second: { template: '1111' },
+        third: { template: '123' },
       },
       // TODO: add settings response when fetch was catch
       // TODO: add messages settings но не сюда, а по имени реквеста проверять в том хуке
@@ -64,7 +64,7 @@ describe('needs.hook function:', () => {
 
     NeedsStore.initialize({
       // TODO: add validate for cache and https
-      settings: { loader: true, cache: { cache: 10 } },
+      settings: { loader: true },
       store: {
         user: {
           id: null,
@@ -77,6 +77,9 @@ describe('needs.hook function:', () => {
         user: 'getUser3',
         sessions: ['getSessions', 'data'],
         cache: 'getUser3',
+      },
+      cache: {
+        cache: { time: 10, clean: { otherResponse: { which: 'token', token: 'main', is: false } } },
       },
       rules: ({ request, response, dataJsonFormat, args }) => {
         if (

@@ -19,11 +19,11 @@ import {
   THttpsState,
   THttpsStateTokens,
   THttpsStatusKey,
-  THttpsTokenTemplate,
   THttpsStateStatusRequest,
   IHttpsResponseCatch,
   THttpsStatusNamedValue,
   THttpsInitValidationFn,
+  THttpsInitializeToken,
 } from './https.types';
 import { makeCustomFetch, fetchDataHandle, makeMocksFn } from './functions';
 
@@ -61,6 +61,8 @@ const defaultStatusRequest: THttpsStateStatusRequest = {
   timeMarker: 0,
   requestCounter: 0,
   onHold: false,
+  response: null,
+  tokenName: null,
 };
 
 // TODO: не делать так, не работает!!!!!! (все проверить и добавить в доку) setState((prev) => { const updates = { ...prev }; some; return update; })
@@ -119,7 +121,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
     ): Promise<IHttpsToken | undefined> => {
       const generalToken = state().tokens?.[tokenName];
       const tokenCacheName = `token-${tokenName}`;
-      const tokenCacheAge = state().settings.cache.token[tokenName];
+      const tokenCacheAge = state().tokens?.[tokenName].cache?.time;
 
       if (generalToken && !generalToken?.token && tokenCacheAge) {
         const cache = CacheStore.getCache<{ [K in string]: { token: string } | null }>({ [tokenCacheName]: null });
@@ -162,7 +164,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       const { statusKey, withLoader, withMessages } = settings;
 
       if (needAbort(statusKey)) return {};
-      updateStatusRequest(statusKey, { value: 'pending', code: 0 });
+      updateStatusRequest(statusKey, { value: 'pending', code: 0, response: null });
 
       if (withLoader) LoaderStore.activate();
 
@@ -184,7 +186,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
         dataJson = await response.json();
       }
 
-      updateStatusRequest(statusKey, { value: 'stop', code: response.status });
+      updateStatusRequest(statusKey, { value: 'stop', code: response.status, response });
       if (withLoader) LoaderStore.determinate();
       if (withMessages) {
         const messageData = MessagesStore.parse(response, dataJson);
@@ -209,15 +211,11 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       const { settings, tokens, namedRequests, mocks, validation } = initial;
       init((prev) => {
         const update: THttpsState = { ...prev };
-        if (tokens)
-          update.tokens = Object.fromEntries(
-            (
-              Object.entries<THttpsTokenTemplate>(tokens) as Array<[IHttpsTokenNames['names'], THttpsTokenTemplate]>
-            ).map<[IHttpsTokenNames['names'], IHttpsToken]>(([name, template]) => [
-              name,
-              { token: null, tokenTemplate: template },
-            ]),
-          ) as THttpsStateTokens;
+        if (tokens) {
+          update.tokens = Object.entries<THttpsInitializeToken>(tokens).reduce((p, [name, { template, cache }]) => {
+            return { ...p, [name]: { token: null, tokenTemplate: template, cache } };
+          }, {} as THttpsStateTokens);
+        }
         if (namedRequests) update.namedRequests = { ...namedRequests };
         if (validation) update.validation = { ...validation };
         if (settings) {
@@ -238,7 +236,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
         if (!tokens || !(name in tokens)) return prev;
         return { ...prev, tokens: { ...tokens, [name]: { ...tokens[name], token: value } } };
       });
-      const tokenCacheAge = state().settings.cache.token?.[name as IHttpsTokenNames['names']];
+      const tokenCacheAge = state().tokens?.[name].cache?.time;
       if (tokenCacheAge) {
         CacheStore.setCache([{ key: `token-${name}`, maxAge: tokenCacheAge, value: { token: value } }]);
       }
@@ -301,14 +299,28 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
         requestData.options.tokenTemplate = tokenByName.tokenTemplate;
       }
 
-      const response = makeRequest<IHttpsRequestsConfig[K][1]>(requestData, {
+      if (tokenName) updateStatusRequest(name, { tokenName });
+
+      const result = await makeRequest<IHttpsRequestsConfig[K][1]>(requestData, {
         statusKey: name,
         withLoader: false,
         withMessages: settings?.messages ?? generalSettings.messages,
       });
+
+      if (tokenName) {
+        const cleanWhenResponseIs = state().tokens?.[tokenName].cache?.cleanWhenResponseIs;
+        if (
+          cleanWhenResponseIs === result.response?.ok ||
+          (result.response?.status &&
+            Array.isArray(cleanWhenResponseIs) &&
+            cleanWhenResponseIs.includes(result.response.status))
+        )
+          CacheStore.removeCache([`token-${tokenName}`]);
+      }
+
       if (withLoader) LoaderStore.determinate();
 
-      return response;
+      return result;
     };
 
     return {
