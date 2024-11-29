@@ -28,7 +28,7 @@ export interface IContextOptions {
   cleanKeys: boolean;
 }
 
-export type TContextFn<S> = (prevState: S, newState: S) => void;
+export type TContextFn<S> = (prevState: S, newState: S, diffState: Array<[string, string]>) => void;
 
 export interface IContext<S extends Object> {
   on(fn: TContextFn<S>): () => void;

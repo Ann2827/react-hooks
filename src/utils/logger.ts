@@ -1,19 +1,25 @@
-import { diff } from './diff';
-
-export const loggerState = (hookName: string, oldState: unknown, newState: unknown, listeners?: number): void => {
+export const loggerState = (
+  hookName: string,
+  oldState: unknown,
+  newState: unknown,
+  diffState: [string, string][],
+  listeners?: number,
+): void => {
   console.groupCollapsed(`Logger: hook ${hookName}. Changed state`);
   console.info('Old state:', oldState);
   console.info('New state:', newState);
-  console.groupCollapsed('Diff');
-  diff(oldState, newState).forEach(([prev, next]) => {
-    if ((prev + next).length > 100) {
-      console.info('Old:', prev);
-      console.info('New:', next);
-    } else {
-      console.info('Change:', prev, '->', next);
-    }
-  });
-  console.groupEnd();
+  if (diffState.length > 0) {
+    console.groupCollapsed('Diff');
+    diffState.forEach(([prev, next]) => {
+      if ((prev + next).length > 100) {
+        console.info('Old:', prev);
+        console.info('New:', next);
+      } else {
+        console.info('Change:', prev, '->', next);
+      }
+    });
+    console.groupEnd();
+  }
   if (listeners !== undefined) console.info('Active listeners', listeners);
   console.trace('Trace');
   console.groupEnd();

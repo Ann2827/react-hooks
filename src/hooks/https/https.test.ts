@@ -33,11 +33,11 @@ describe('https HttpsStore:', () => {
     restoreFetch = mockFetch();
     restoreStorage = mockStorage();
     HttpsStore.initialize({
-      settings: { loader: true, messages: true, mockMode: true, waitToken: true, cache: { token: { third: 10 } } },
+      settings: { loader: true, messages: true, mockMode: true, waitToken: true },
       tokens: {
-        main: 'bearer',
-        second: 'x-auth:Bearer ${token}',
-        third: 'bearer',
+        main: { template: 'bearer' },
+        second: { template: 'x-auth:Bearer ${token}' },
+        third: { template: 'bearer', cache: { time: 10, cleanWhenResponseIs: [401] } },
         // test: '123',
       },
       // TODO: add settings response when fetch was catch
@@ -202,7 +202,7 @@ describe('https.hook useHttps named:', () => {
     restoreFetch = mockFetch();
     HttpsStore.initialize({
       settings: { mockMode: true, waitToken: true },
-      tokens: { main: 'bearer' },
+      tokens: { main: { template: 'bearer' } },
       namedRequests: {
         getData: (): IHttpsRequest => ({
           url: 'https://test.com',

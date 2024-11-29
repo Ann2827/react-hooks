@@ -17,29 +17,37 @@ const dataOptions = {
 export const logsSettingsEnable = (): void => {
   dataOptions.logger = true;
 };
-const initialState: TSettingsState = { logger: false };
+const initialState: TSettingsState = {};
 // TODO: logs only for some hooks
 const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enrich<ISettingsData>(
-  (_setState, { state, init }) => {
+  (_setState, { init }) => {
     const initialize: ISettingsData['initialize'] = (initState): void => {
-      const { logger } = initState;
-      init(() => initState);
+      const { logger, modules } = initState;
+      init(() => {
+        if (logger) {
+          [SettingsStore, LoaderStore, HttpsStore, MessagesStore, NeedsStore, NotificationsStore, CacheStore].forEach(
+            (item) => {
+              item.logs(true);
+            },
+          );
+          logsSettingsEnable();
+          logsLoaderEnable();
+          logsHttpsEnable();
+          logsMessagesEnable();
+          logsNeedsEnable();
+          logsImagePreloaderEnable();
+          logsNotificationsEnable();
+          logsCacheEnable();
+        }
 
-      if (logger) {
-        [SettingsStore, LoaderStore, HttpsStore, MessagesStore, NeedsStore, NotificationsStore, CacheStore].forEach(
-          (item) => {
-            item.logs(true);
-          },
-        );
-        logsSettingsEnable();
-        logsLoaderEnable();
-        logsHttpsEnable();
-        logsMessagesEnable();
-        logsNeedsEnable();
-        logsImagePreloaderEnable();
-        logsNotificationsEnable();
-        logsCacheEnable();
-      }
+        if (modules?.cache) CacheStore.initialize(modules.cache);
+        if (modules?.messages) MessagesStore.initialize(modules.messages);
+        if (modules?.notifications) NotificationsStore.initialize(modules.notifications);
+        if (modules?.https) HttpsStore.initialize(modules.https);
+        if (modules?.needs) NeedsStore.initialize(modules.needs);
+
+        return {};
+      });
     };
 
     return {

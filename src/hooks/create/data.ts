@@ -25,7 +25,7 @@ export const createData = <S extends TDataState, E extends TDataEvent>(
     this._state = cloneNewState;
     this._event(e, newState);
 
-    if (options?.logger) loggerState(options?.hookName || 'create', cloneThisState, cloneNewState);
+    if (options?.logger) loggerState(options?.hookName || 'create', cloneThisState, cloneNewState, []);
   },
   state() {
     return Object.assign({}, this._state);

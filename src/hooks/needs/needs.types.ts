@@ -2,6 +2,7 @@ import { IStore, TStoreEnrich } from '@core';
 import { IHttpsRequestsConfig } from '@hooks';
 
 import { TCacheSetData } from '../cache/cache.types';
+import { IHttpsTokenNames } from '../https';
 
 /**
  * Interfaces for rewrite
@@ -19,7 +20,17 @@ export interface INeedsStoreConfig extends Record<string, unknown> {}
 export type TNeedsSettings = {
   // TODO: реализовать
   loader: boolean;
-  cache: { [K in keyof INeedsStoreConfig]?: TCacheSetData['maxAge'] };
+};
+
+type TNeedsResponseStatus = boolean | number[];
+type TNeedsResponseOtherAny = { which: 'any'; is: TNeedsResponseStatus };
+type TNeedsResponseOtherToken = { which: 'token'; token: IHttpsTokenNames['names']; is: TNeedsResponseStatus };
+type TNeedsCacheClean = {
+  thisResponseIs: TNeedsResponseStatus;
+  otherResponse: TNeedsResponseOtherAny | TNeedsResponseOtherToken;
+};
+type TNeedsCache = {
+  [K in keyof INeedsStoreConfig]?: { time: TCacheSetData['maxAge']; clean?: Partial<TNeedsCacheClean> };
 };
 
 export type TNeedsState = {
@@ -31,6 +42,7 @@ export type TNeedsState = {
   rules: <K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
     args: TNeedsInitializeRulesArgs<K>,
   ) => INeedsStoreConfig[K];
+  cache: TNeedsCache | null;
   // меняются
   store: INeedsStoreConfig | null;
   state: { [K in keyof INeedsStoreConfig]: boolean | null } | null;
@@ -45,10 +57,11 @@ export type TNeedsInitializeRulesArgs<K extends keyof INeedsStoreConfig> = {
   args?: unknown;
 };
 
-type TNeedsInitialize = {
+export type TNeedsInitialize = {
   settings: Partial<TNeedsState['settings']>;
   store: INeedsStoreConfig;
   requests: { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] };
+  cache: TNeedsCache;
   rules: <K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
     args: TNeedsInitializeRulesArgs<K>,
   ) => INeedsStoreConfig[K];

@@ -1,4 +1,4 @@
-import { TCacheSettings } from '../cache/cache.types';
+import { TCacheSetData } from '../cache/cache.types';
 
 import type { IStore, TStoreEnrich } from '@core';
 
@@ -43,6 +43,8 @@ export type THttpsResponseObj<K extends keyof IHttpsRequestsConfig, C extends IH
  */
 export type THttpsTokenTemplate = 'bearer' | string;
 export type THttpsTokenValue = string | null;
+type THttpsTokenResponseStatus = boolean | number[];
+type THttpsTokenCache = { time: TCacheSetData['maxAge']; cleanWhenResponseIs?: THttpsTokenResponseStatus };
 export interface IHttpsToken {
   token: THttpsTokenValue;
   tokenTemplate: THttpsTokenTemplate;
@@ -89,7 +91,6 @@ export type THttpsSettings = {
   messages: boolean;
   waitToken: boolean;
   mockMode: boolean;
-  cache: { token: Partial<Record<IHttpsTokenNames['names'], TCacheSettings['maxAge']>> };
 };
 
 export interface IHttpsRequest extends Partial<IHttpsFetchOptions> {
@@ -122,8 +123,10 @@ export type THttpsStateStatusRequest = {
   timeMarker: number;
   requestCounter: number;
   onHold: boolean;
+  response: Response | null;
+  tokenName: string | null;
 };
-export type THttpsStateTokens = Record<IHttpsTokenNames['names'], IHttpsToken>;
+export type THttpsStateTokens = Record<IHttpsTokenNames['names'], IHttpsToken & { cache?: THttpsTokenCache }>;
 export type THttpsState = {
   // постоянные после инита
   settings: THttpsSettings;
@@ -148,12 +151,13 @@ export type THttpsMockConfig = {
   additionalRules?: ({ input, init, mockName, requestName }: ICustomFetchCheckProps) => Response | void;
   // scenarios: Record<string, unknown>;
 };
-type THttpsInitialize = {
+export type THttpsInitializeToken = { template: THttpsTokenTemplate; cache?: THttpsTokenCache };
+export type THttpsInitialize = {
   settings: Partial<THttpsState['settings']>;
   /**
    * Uses only for namedRequest
    */
-  tokens: Record<IHttpsTokenNames['names'], THttpsTokenTemplate>;
+  tokens: Record<IHttpsTokenNames['names'], THttpsInitializeToken>;
   namedRequests: THttpsInitRequests;
   validation: THttpsInitValidation;
   mocks: THttpsMockConfig;
