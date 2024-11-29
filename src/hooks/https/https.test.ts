@@ -202,7 +202,7 @@ describe('https.hook useHttps named:', () => {
     restoreFetch = mockFetch();
     HttpsStore.initialize({
       settings: { mockMode: true, waitToken: true },
-      tokens: { main: 'bearer' },
+      tokens: { main: { template: 'bearer' } },
       namedRequests: {
         getData: (): IHttpsRequest => ({
           url: 'https://test.com',
