@@ -32,7 +32,7 @@ const MessagesStore = makeStore<TMessagesState>(initialState, dataOptions).enric
           if (
             (typeof key === 'number' && key === response.status) ||
             (typeof key === 'string' && key.split(';').some((i) => Number(i) === response.status)) ||
-            (typeof key === 'string' && key === 'default')
+            (typeof key === 'string' && key === 'default' && !response.ok)
           ) {
             return [{ ...prev, ...value }, true];
           }
