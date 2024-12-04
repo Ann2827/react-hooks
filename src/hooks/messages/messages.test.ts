@@ -54,6 +54,11 @@ describe('MessagesStore:', () => {
     const data = MessagesStore.parse(new Response(JSON.stringify({ userId: 4 }), { status: 400 }), { userId: 4 });
     expect(data).toEqual([{ text: 'Попробуйте повторить попытку', title: 'Ошибка {{errorCode}}' }, 'error']);
   });
+
+  test('useMessages: shouldn`t return message', () => {
+    const data = MessagesStore.parse(new Response(JSON.stringify({ userId: 4 }), { status: 200 }), { userId: 4 });
+    expect(data).toEqual(undefined);
+  });
 });
 
 // describe('messages.hook function:', () => {
