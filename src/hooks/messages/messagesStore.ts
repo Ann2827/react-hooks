@@ -34,8 +34,8 @@ const MessagesStore = makeStore<TMessagesState>(initialState, dataOptions).enric
           (typeof key === 'string' && key.split(';').some((i) => Number(i) === response.status)),
       );
 
-      if (!errCodeArr && !errDefaultObj) return;
-      return [{ ...errDefaultObj, ...errCodeArr?.[1] }, response.ok ? 'success' : 'error'];
+      if (errCodeArr) return [{ ...errDefaultObj, ...errCodeArr[1] }, response.ok ? 'success' : 'error'];
+      return !response.ok ? [{ ...errDefaultObj }, 'error'] : undefined;
     };
 
     return {
