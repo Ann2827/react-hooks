@@ -42,7 +42,7 @@ export const logsHttpsEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: THttpsState = {
-  settings: { loader: false, messages: false, mockMode: false, waitToken: false, cache: { token: {} } },
+  settings: { loader: false, messages: false, mockMode: false, waitToken: false, requestWithoutToken: false },
   namedRequests: null,
   status: { request: {}, named: {} },
   tokens: null,
@@ -289,14 +289,14 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
         updateStatusNamed(name, 'waitToken');
         const tokenByName = await getTokenByName(tokenName, generalSettings.waitToken);
         updateStatusNamed(name);
-        if (!tokenByName) {
+        if (!tokenByName && !generalSettings.requestWithoutToken) {
           console.error(`Request by name: ${name}. Token by name: ${tokenName} not found`);
           if (withLoader) LoaderStore.determinate();
           return {};
         }
 
-        requestData.options.token = tokenByName.token;
-        requestData.options.tokenTemplate = tokenByName.tokenTemplate;
+        requestData.options.token = tokenByName?.token || '';
+        requestData.options.tokenTemplate = tokenByName?.tokenTemplate || tokenTemplate;
       }
 
       if (tokenName) updateStatusRequest(name, { tokenName });

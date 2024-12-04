@@ -91,6 +91,7 @@ export type THttpsSettings = {
   messages: boolean;
   waitToken: boolean;
   mockMode: boolean;
+  requestWithoutToken: boolean;
 };
 
 export interface IHttpsRequest extends Partial<IHttpsFetchOptions> {
