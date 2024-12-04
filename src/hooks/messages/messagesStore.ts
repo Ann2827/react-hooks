@@ -26,21 +26,16 @@ const MessagesStore = makeStore<TMessagesState>(initialState, dataOptions).enric
     };
 
     const parse: IMessagesData['parse'] = (response, _dataJson): ReturnType<IMessagesData['parse']> => {
-      // TODO: странный формат, упростить
-      const [data, changed] = Object.entries(state().codes).reduce(
-        ([prev, s], [key, value]) => {
-          if (
-            (typeof key === 'number' && key === response.status) ||
-            (typeof key === 'string' && key.split(';').some((i) => Number(i) === response.status)) ||
-            (typeof key === 'string' && key === 'default' && !response.ok)
-          ) {
-            return [{ ...prev, ...value }, true];
-          }
-          return [prev, s];
-        },
-        [{}, false],
+      const { default: errDefaultObj, ...codes } = state().codes;
+
+      const errCodeArr = Object.entries(codes).find(
+        ([key]) =>
+          (typeof key === 'number' && key === response.status) ||
+          (typeof key === 'string' && key.split(';').some((i) => Number(i) === response.status)),
       );
-      return changed ? [data, response.ok ? 'success' : 'error'] : undefined;
+
+      if (!errCodeArr && !errDefaultObj) return;
+      return [{ ...errDefaultObj, ...errCodeArr?.[1] }, response.ok ? 'success' : 'error'];
     };
 
     return {
