@@ -1,4 +1,5 @@
 import { IContextOptions, makeStore } from '@core';
+import { loggerMessage } from '@utils';
 
 import { TCacheState, ICacheData, TCachePlace, TCacheAction } from './cache.types';
 
@@ -87,6 +88,7 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
         const age = expires ? new Date(Date.now() + 1000 * 60 * expires).getTime() : null;
         action(place, 'set', `${prefix}-${key}`, JSON.stringify({ maxAge: age, value }));
       });
+      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Set cache', data);
     };
 
     const getCache: ICacheData['getCache'] = (data): ReturnType<ICacheData['getCache']> => {
@@ -113,6 +115,7 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
       keys.forEach((key) => {
         action(place, 'remove', `${prefix}-${key}`);
       });
+      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Remove cache', keys);
     };
 
     const resetCache: ICacheData['resetCache'] = (): ReturnType<ICacheData['resetCache']> => {

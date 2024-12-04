@@ -16,7 +16,7 @@ export const logsNeedsEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: TNeedsState = {
-  settings: { loader: false },
+  settings: { loader: false, waitRequest: false },
   store: null,
   requests: null,
   cache: null,
@@ -131,6 +131,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
       return;
     }
     const { response, dataJson } = await HttpsStore.namedRequest(requestName, ...args);
+    if (state().settings.waitRequest && !response) return;
     if (response?.ok) {
       // @ts-ignore
       const dataJsonFormat = path.reduce(
@@ -175,7 +176,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
       });
       if (cache[key]) {
         if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Restored from cache', cache[key]);
-        updateSuccessData(key, cache[key]);
+        updateSuccessData(key, cache[key], false);
         return;
       }
     }
