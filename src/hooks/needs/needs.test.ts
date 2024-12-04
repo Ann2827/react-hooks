@@ -64,7 +64,7 @@ describe('needs.hook function:', () => {
 
     NeedsStore.initialize({
       // TODO: add validate for cache and https
-      settings: { loader: true },
+      settings: { loader: true, waitRequest: false },
       store: {
         user: {
           id: null,

@@ -20,6 +20,7 @@ export interface INeedsStoreConfig extends Record<string, unknown> {}
 export type TNeedsSettings = {
   // TODO: реализовать
   loader: boolean;
+  waitRequest: boolean;
 };
 
 type TNeedsResponseStatus = boolean | number[];
