@@ -169,8 +169,9 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     }
   };
   const request: INeedsData['request'] = async (key, ...args): ReturnType<INeedsData['request']> => {
-    if (state().state?.[key] !== null && !args.includes(NeedsActionTypes.refresh)) return;
-    if (state().cache?.[key] && !args.includes(NeedsActionTypes.refresh)) {
+    const type = args.includes(NeedsActionTypes.merge) ? NeedsActionTypes.merge : NeedsActionTypes.refresh;
+    if (state().state?.[key] !== null && type !== NeedsActionTypes.merge) return;
+    if (state().cache?.[key] && type !== NeedsActionTypes.merge) {
       const cache = CacheStore.getCache({
         [key]: null,
       });
@@ -180,7 +181,7 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
         return;
       }
     }
-    await action(key, NeedsActionTypes.refresh, ...args);
+    await action(key, type, ...args);
   };
   const update: INeedsData['update'] = async (key, ...args): ReturnType<INeedsData['update']> => {
     await action(key, NeedsActionTypes.refresh, ...args);
