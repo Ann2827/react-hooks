@@ -31,7 +31,10 @@ type TNeedsCacheClean = {
   otherResponse: TNeedsResponseOtherAny | TNeedsResponseOtherToken;
 };
 type TNeedsCache = {
-  [K in keyof INeedsStoreConfig]?: { time: TCacheSetData['maxAge']; clean?: Partial<TNeedsCacheClean> };
+  [K in keyof INeedsStoreConfig]?: {
+    time: TCacheSetData['maxAge'];
+    clean?: Partial<TNeedsCacheClean>;
+  };
 };
 
 export type TNeedsState = {

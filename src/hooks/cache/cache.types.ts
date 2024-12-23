@@ -1,6 +1,6 @@
 import { IStore, TStoreEnrich } from '@core';
 
-export type TCachePlace = 'localStorage';
+export type TCachePlace = 'localStorage' | 'sessionStorage';
 export type TCacheAction = {
   get: string | null;
   set: void;
@@ -18,6 +18,7 @@ export type TCacheSettings = {
 export type TCacheState = {
   settings: TCacheSettings;
   checks: { [K in TCachePlace]: boolean | null };
+  placements: Record<string, Partial<{ place: TCachePlace }>>;
 };
 export type TCacheSetData = {
   maxAge?: TCacheSettings['maxAge'];
@@ -27,14 +28,15 @@ export type TCacheSetData = {
 
 export type TCacheInitialize = {
   settings: Partial<TCacheState['settings']>;
+  placements: TCacheState['placements'];
 };
 
 export interface ICacheData {
   initialize(initial: Partial<TCacheInitialize>): void;
   action<T extends keyof TCacheAction>(place: TCachePlace, type: T, key: string, value?: string): TCacheAction[T];
-  setCache(data: TCacheSetData[]): void;
-  getCache<T extends object = Record<string, Record<string, unknown> | null>>(data: T): Partial<T>;
-  removeCache(keys: string[]): void;
+  setCache(data: TCacheSetData[], place?: TCachePlace): void;
+  getCache<T extends object = Record<string, Record<string, unknown> | null>>(data: T, place?: TCachePlace): Partial<T>;
+  removeCache(keys: string[], place?: TCachePlace): void;
   resetCache(): void;
 }
 

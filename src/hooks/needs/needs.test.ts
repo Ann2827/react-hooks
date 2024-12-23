@@ -79,7 +79,10 @@ describe('needs.hook function:', () => {
         cache: 'getUser3',
       },
       cache: {
-        cache: { time: 10, clean: { otherResponse: { which: 'token', token: 'main', is: false } } },
+        cache: {
+          time: 10,
+          clean: { otherResponse: { which: 'token', token: 'main', is: false } },
+        },
       },
       rules: ({ request, response, dataJsonFormat, args }) => {
         if (

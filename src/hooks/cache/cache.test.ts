@@ -9,7 +9,7 @@ describe('cache.hook CacheStore:', () => {
 
   beforeAll(() => {
     restoreStorage = mockStorage();
-    CacheStore.initialize({});
+    CacheStore.initialize({ placements: { 't-1': { place: 'sessionStorage' } } });
   });
 
   afterAll(() => {
@@ -57,6 +57,41 @@ describe('cache.hook CacheStore:', () => {
 
     expect(CacheStore.getCache({ '1': null })).toEqual({ '1': null });
     expect(global.localStorage.getItem('test')).toBe(JSON.stringify({ maxAge: null, value: 'test' }));
+  });
+
+  test('should setCache in sessionStorage', () => {
+    CacheStore.setCache([{ key: '1', value: 'test' }], 'sessionStorage');
+    const value = global.sessionStorage.getItem('cache-1');
+    expect(value).toEqual(JSON.stringify({ maxAge: null, value: 'test' }));
+  });
+
+  test('should getCache in sessionStorage', () => {
+    global.sessionStorage.setItem('cache-1', JSON.stringify({ maxAge: null, value: 'test' }));
+    const value = CacheStore.getCache({ '1': null }, 'sessionStorage');
+    expect(value).toEqual({ '1': 'test' });
+  });
+
+  test('should resetCache in sessionStorage', () => {
+    global.sessionStorage.setItem('cache-1', JSON.stringify({ maxAge: null, value: 'test' }));
+    global.sessionStorage.setItem('cache-2', JSON.stringify({ maxAge: null, value: 'test' }));
+    global.sessionStorage.setItem('test', JSON.stringify({ maxAge: null, value: 'test' }));
+
+    CacheStore.resetCache();
+
+    expect(CacheStore.getCache({ '1': null }, 'sessionStorage')).toEqual({ '1': null });
+    expect(global.sessionStorage.getItem('test')).toBe(JSON.stringify({ maxAge: null, value: 'test' }));
+  });
+
+  test('should setCache t-1 in place from settings', () => {
+    CacheStore.setCache([{ key: 't-1', value: 'test' }]);
+    const value = global.sessionStorage.getItem('cache-t-1');
+    expect(value).toEqual(JSON.stringify({ maxAge: null, value: 'test' }));
+  });
+
+  test('should getCache t-1 in place from settings', () => {
+    global.sessionStorage.setItem('cache-t-1', JSON.stringify({ maxAge: null, value: 'test' }));
+    const value = CacheStore.getCache({ 't-1': null });
+    expect(value).toEqual({ 't-1': 'test' });
   });
 });
 

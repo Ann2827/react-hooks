@@ -169,8 +169,8 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     }
   };
   const request: INeedsData['request'] = async (key, ...args): ReturnType<INeedsData['request']> => {
-    if (state().state?.[key] !== null) return;
-    if (state().cache?.[key]) {
+    if (state().state?.[key] !== null && !args.includes(NeedsActionTypes.refresh)) return;
+    if (state().cache?.[key] && !args.includes(NeedsActionTypes.refresh)) {
       const cache = CacheStore.getCache({
         [key]: null,
       });

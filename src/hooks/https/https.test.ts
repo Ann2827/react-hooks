@@ -37,7 +37,7 @@ describe('https HttpsStore:', () => {
       tokens: {
         main: { template: 'bearer' },
         second: { template: 'x-auth:Bearer ${token}' },
-        third: { template: 'bearer', cache: { time: 10, cleanWhenResponseIs: [401] } },
+        third: { template: 'bearer', cache: { time: 60, cleanWhenResponseIs: [401] } },
         // test: '123',
       },
       // TODO: add settings response when fetch was catch
@@ -93,7 +93,7 @@ describe('https HttpsStore:', () => {
     });
     HttpsStore.setToken('main', '123');
     HttpsStore.setToken('second', '123');
-    CacheStore.setCache([{ key: 'token-third', maxAge: 10, value: { token: '123' } }]);
+    CacheStore.setCache([{ key: 'token-third', maxAge: 60, value: { token: '123' } }]);
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -143,7 +143,7 @@ describe('https HttpsStore:', () => {
     expect(dataJson).toEqual({ scenario3: true });
   });
 
-  test('namedRequest: getSessions with cached token third', async () => {
+  test('namedRequest: getList with cached token third', async () => {
     const { response, dataJson } = await HttpsStore.namedRequest('getList');
     expect(dataJson).toEqual({ data: [] });
     expect(response?.status).toEqual(200);
