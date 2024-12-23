@@ -40,3 +40,7 @@ export const loggerData = (hookName: string, description: string, logs: { messag
   console.trace('Trace');
   console.groupEnd();
 };
+
+export const loggerError = (hookName: string, description: string): void => {
+  console.error(`Logger: hook ${hookName}.`, description);
+};

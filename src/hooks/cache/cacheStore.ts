@@ -1,7 +1,10 @@
 import { IContextOptions, makeStore } from '@core';
-import { loggerMessage } from '@utils';
+import { loggerData, loggerMessage } from '@utils';
 
 import { TCacheState, ICacheData, TCachePlace, TCacheAction } from './cache.types';
+import { getPlace } from './cache.functions';
+
+const PLACEMENTS: TCachePlace[] = ['localStorage', 'sessionStorage'];
 
 const dataOptions: Partial<IContextOptions> = {
   hookName: 'cache',
@@ -12,8 +15,9 @@ export const logsCacheEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: TCacheState = {
-  checks: { localStorage: null },
+  checks: { localStorage: null, sessionStorage: null },
   settings: { place: 'localStorage', prefix: 'cache', maxAge: null },
+  placements: {},
 };
 
 const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICacheData>(
@@ -51,14 +55,12 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
 
     // Public
     const initialize: ICacheData['initialize'] = (initial): ReturnType<ICacheData['initialize']> => {
-      const { settings } = initial;
-      init((prev) => {
-        const update: TCacheState = { ...prev };
-        if (settings) {
-          update.settings = { ...prev.settings, ...settings };
-        }
-        return update;
-      });
+      const { settings, placements } = initial;
+      init((prev) => ({
+        checks: { ...initialState.checks },
+        settings: { ...prev.settings, ...settings },
+        placements: { ...prev.placements, ...placements },
+      }));
     };
     // @ts-ignore
     const action: ICacheData['action'] = <T extends keyof TCacheAction>(
@@ -80,21 +82,35 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
       return;
     };
 
-    const setCache: ICacheData['setCache'] = (data): ReturnType<ICacheData['setCache']> => {
-      const { place, prefix, maxAge } = state().settings;
+    const setCache: ICacheData['setCache'] = (data, pl): ReturnType<ICacheData['setCache']> => {
+      const { placements, settings } = state();
+      const { prefix, maxAge, place: settingsPlace } = settings;
+
+      const logs: { message: string; data?: any }[] = [];
+
       data.forEach((item) => {
         const { maxAge: customMaxAge, key, value } = item;
+        const place = getPlace(settingsPlace, pl, placements, key);
         const expires = customMaxAge ?? maxAge;
         const age = expires ? new Date(Date.now() + 1000 * 60 * expires).getTime() : null;
-        action(place, 'set', `${prefix}-${key}`, JSON.stringify({ maxAge: age, value }));
+        const itemData = JSON.stringify({ maxAge: age, value });
+        const itemKey = `${prefix}-${key}`;
+
+        logs.push({
+          message: itemKey,
+          data: place + ' ' + (((itemKey.length + itemData.length) * 2) / 1024).toFixed(2) + ' KB',
+        });
+
+        action(pl || place, 'set', itemKey, itemData);
       });
-      if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Set cache', data);
+      if (dataOptions.logger) loggerData(dataOptions.hookName!, 'Set cache', logs);
     };
 
-    const getCache: ICacheData['getCache'] = (data): ReturnType<ICacheData['getCache']> => {
-      const { place, prefix } = state().settings;
+    const getCache: ICacheData['getCache'] = (data, pl): ReturnType<ICacheData['getCache']> => {
+      const { prefix } = state().settings;
       const cacheData = { ...data };
       (Object.keys(data) as Array<keyof typeof data>).forEach((key) => {
+        const place = getPlace(state().settings.place, pl, state().placements, key.toString());
         const value: any = action(place, 'get', `${prefix}-${key.toString()}`);
         try {
           if (typeof value !== 'string') return;
@@ -110,21 +126,23 @@ const CacheStore = makeStore<TCacheState>(initialState, dataOptions).enrich<ICac
       return cacheData;
     };
 
-    const removeCache: ICacheData['removeCache'] = (keys): ReturnType<ICacheData['removeCache']> => {
-      const { place, prefix } = state().settings;
+    const removeCache: ICacheData['removeCache'] = (keys, pl): ReturnType<ICacheData['removeCache']> => {
+      const { prefix } = state().settings;
       keys.forEach((key) => {
+        const place = getPlace(state().settings.place, pl, state().placements, key);
         action(place, 'remove', `${prefix}-${key}`);
       });
       if (dataOptions.logger) loggerMessage(dataOptions.hookName!, 'Remove cache', keys);
     };
 
     const resetCache: ICacheData['resetCache'] = (): ReturnType<ICacheData['resetCache']> => {
-      const { place, prefix } = state().settings;
-      const keys = action(place, 'keys', prefix);
-      keys.forEach((key) => {
-        action(place, 'remove', key);
+      const { prefix } = state().settings;
+      PLACEMENTS.forEach((place) => {
+        const keys = action(place, 'keys', prefix);
+        keys.forEach((key) => {
+          action(place, 'remove', key);
+        });
       });
-      reset();
     };
 
     return {
