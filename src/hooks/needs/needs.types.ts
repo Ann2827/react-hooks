@@ -72,7 +72,17 @@ export type TNeedsInitialize = {
 };
 
 export enum NeedsActionTypes {
+  /**
+   * Стандартный запрос с кэшом
+   */
+  request = 'request',
+  /**
+   * Принудительно перезапрашивает минуя кэш
+   */
   refresh = 'refresh',
+  /**
+   * Добавляет к старым данным новые
+   */
   merge = 'merge',
 }
 
