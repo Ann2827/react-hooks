@@ -53,6 +53,7 @@ type TNotificationsStateNotifications = {
   type: TNotificationsType;
   id: number;
   response?: Response;
+  dataJson?: any;
 };
 
 export type TNotificationsState = {
@@ -77,6 +78,7 @@ type INotificationsSendProps = {
   sticky?: TNotificationsSettings['sticky'];
   duration?: TNotificationsSettings['duration'];
   response?: TNotificationsStateNotifications['response'];
+  dataJson?: TNotificationsStateNotifications['dataJson'];
 };
 
 export interface INotificationsData {

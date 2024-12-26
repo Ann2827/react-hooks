@@ -191,7 +191,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       if (withMessages) {
         const messageData = MessagesStore.parse(response, dataJson);
         if (messageData) {
-          NotificationsStore.send({ data: messageData[0], type: messageData[1], response });
+          NotificationsStore.send({ data: messageData[0], type: messageData[1], response, dataJson });
         }
       }
       if (dataOptions.logger)
