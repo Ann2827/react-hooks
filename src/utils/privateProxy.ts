@@ -8,7 +8,7 @@ const privateProxy = <T extends Object>(): ProxyHandler<T> => ({
     }
   },
   set(target, prop, val) {
-    console.log('privateProxy Proxy set', target, prop, val);
+    // console.log('privateProxy Proxy set', target, prop, val);
     // перехватываем запись свойства
     if (typeof prop !== 'string' || prop?.startsWith('_')) {
       throw new Error('Отказано в доступе');

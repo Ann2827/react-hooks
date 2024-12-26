@@ -25,7 +25,7 @@ export type TNotificationsSettings = {
 
   /**
    * Duration of the message display
-   * @default 3000
+   * @default 3
    */
   duration: number;
 
