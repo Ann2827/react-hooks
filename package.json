@@ -45,7 +45,9 @@
     "t:mes": "jest src/hooks/messages/messages.test.ts",
     "t:cache": "jest src/hooks/cache/cache.test.ts",
     "t:loader": "jest src/hooks/loader/loader.test.ts",
-    "t:diff": "jest src/utils/diff.test.ts"
+    "t:diff": "jest src/utils/diff.test.ts",
+    "t:notifications": "jest src/hooks/notifications/notifications.test.ts",
+    "t:timer": "jest src/hooks/timer/timer.test.ts"
   },
   "peerDependencies": {
     "react": "16 || 17 || 18",

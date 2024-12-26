@@ -7,6 +7,7 @@ import MessagesStore, { logsMessagesEnable } from '../messages/messagesStore';
 import NeedsStore, { logsNeedsEnable } from '../needs/needsStore';
 import NotificationsStore, { logsNotificationsEnable } from '../notifications/notificationsStore';
 import CacheStore, { logsCacheEnable } from '../cache/cacheStore';
+import TimerStore, { logsTimerEnable } from '../timer/timerStore';
 
 import { TSettingsState, ISettingsData } from './settings.types';
 
@@ -25,11 +26,18 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
       const { logger, modules } = initState;
       init(() => {
         if (logger) {
-          [SettingsStore, LoaderStore, HttpsStore, MessagesStore, NeedsStore, NotificationsStore, CacheStore].forEach(
-            (item) => {
-              item.logs(true);
-            },
-          );
+          [
+            SettingsStore,
+            LoaderStore,
+            HttpsStore,
+            MessagesStore,
+            NeedsStore,
+            NotificationsStore,
+            CacheStore,
+            TimerStore,
+          ].forEach((item) => {
+            item.logs(true);
+          });
           logsSettingsEnable();
           logsLoaderEnable();
           logsHttpsEnable();
@@ -38,6 +46,7 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
           logsImagePreloaderEnable();
           logsNotificationsEnable();
           logsCacheEnable();
+          logsTimerEnable();
         }
 
         if (modules?.cache) CacheStore.initialize(modules.cache);
