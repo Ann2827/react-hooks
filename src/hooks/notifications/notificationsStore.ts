@@ -41,7 +41,7 @@ const NotificationsStore = makeStore<TNotificationsState>(initialState, dataOpti
     };
 
     const send: INotificationsData['send'] = (props): ReturnType<INotificationsData['send']> => {
-      const { type = 'error', data, duration, sticky, response } = props;
+      const { type = 'error', data, duration, sticky, response, dataJson } = props;
 
       const currentHash = JSON.stringify(data);
       if (
@@ -54,7 +54,7 @@ const NotificationsStore = makeStore<TNotificationsState>(initialState, dataOpti
       setState((prev) => ({
         ...prev,
         lastID: currentID,
-        notifications: [...prev.notifications, { id: currentID, data, type, response }],
+        notifications: [...prev.notifications, { id: currentID, data, type, response, dataJson }],
       }));
 
       const time = duration ?? state().settings.duration;
