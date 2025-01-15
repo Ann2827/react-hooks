@@ -5,6 +5,7 @@ import { TNeedsInitialize } from '../needs/needs.types';
 import { TCacheInitialize } from '../cache/cache.types';
 import { TNotificationsInitialize } from '../notifications/notifications.types';
 import { TMessagesInitialize } from '../messages/messages.types';
+import { TScenariosInitialize } from '../scenarios/scenarios.types';
 
 export type TSettingsState = {};
 
@@ -14,6 +15,7 @@ type TSettingsModules = {
   cache: Partial<TCacheInitialize>;
   notifications: Partial<TNotificationsInitialize>;
   messages: Partial<TMessagesInitialize>;
+  scenarios: Partial<TScenariosInitialize>;
 };
 
 type TSettingsInitialize = {

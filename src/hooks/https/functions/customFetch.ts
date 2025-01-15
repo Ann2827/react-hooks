@@ -18,6 +18,7 @@ export const makeCustomFetch = (
       init,
       mockName: options?.mockName,
       requestName: options?.requestName,
+      options,
     });
 
     if (!response && realFallback) {

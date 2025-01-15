@@ -35,7 +35,7 @@ export type THttpsInitValidationFn<K extends keyof IHttpsRequestsConfig> = (
 export type THttpsResponseObj<K extends keyof IHttpsRequestsConfig, C extends IHttpsResponseCatch = {}> = {
   response: Response;
   dataJson: IHttpsRequestsConfig[K][1] | IHttpsRequestsConfig[K][2] | C;
-  validation?: THttpsInitValidationFn<K>;
+  validation: THttpsInitValidationFn<K>;
 };
 /**
  * 'bearer' = template "Authorization:Bearer ${token}"
@@ -74,8 +74,15 @@ export interface ICustomFetchOptions {
 export interface ICustomFetchCheckProps extends ICustomFetchOptions {
   input: RequestInfo | URL;
   init?: RequestInit;
+  options?: IHttpsFetchOptions;
 }
-export type TCustomFetchCheck = ({ input, init, mockName, requestName }: ICustomFetchCheckProps) => Response | void;
+export type TCustomFetchCheck = ({
+  input,
+  init,
+  mockName,
+  requestName,
+  options,
+}: ICustomFetchCheckProps) => Response | void;
 export type TCustomFetch = (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -92,6 +99,11 @@ export type THttpsSettings = {
   waitToken: boolean;
   mockMode: boolean;
   requestWithoutToken: boolean;
+  /**
+   * in sec
+   * @default 3
+   */
+  mockDelay: number;
 };
 
 export interface IHttpsRequest extends Partial<IHttpsFetchOptions> {
@@ -124,21 +136,28 @@ export type THttpsStateStatusRequest = {
   timeMarker: number;
   requestCounter: number;
   onHold: boolean;
-  response: Response | null;
   tokenName: string | null;
+};
+export type THttpsStateStatusLog<K extends keyof IHttpsRequestsConfig = keyof IHttpsRequestsConfig> = {
+  input: RequestInfo | URL;
+  init?: RequestInit;
+  response: Response;
+  dataJson: THttpsResponseObj<K>['dataJson'];
+  options?: IHttpsFetchOptions;
 };
 export type THttpsStateTokens = Record<IHttpsTokenNames['names'], IHttpsToken & { cache?: THttpsTokenCache }>;
 export type THttpsState = {
   // постоянные после инита
   settings: THttpsSettings;
   namedRequests: THttpsInitRequests | null;
-  validation: THttpsInitValidation | null;
+  validation: Required<THttpsInitValidation> | null;
   customFetch: TCustomFetch;
   // меняются
   tokens: THttpsStateTokens | null;
   status: {
     request: Partial<Record<THttpsStatusKey, THttpsStateStatusRequest>>;
     named: Partial<Record<THttpsStatusKey, THttpsStatusNamedValue>>;
+    logs: Partial<Record<THttpsStatusKey, THttpsStateStatusLog>>;
   };
 };
 

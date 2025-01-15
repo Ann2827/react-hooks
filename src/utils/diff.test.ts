@@ -19,4 +19,20 @@ describe('utils diff: fn:', () => {
     ]);
     expect(diff({ a: { b: '1' } }, { a: { b: '2' } })).toEqual([['a.b:1', 'a.b:2']]);
   });
+
+  test('should be return diff for obj functions', () => {
+    expect(diff({ a: {} }, { a: { f: () => true } })).toEqual([['a.f:undefined', 'a.f:"() => true"']]);
+    expect(
+      diff(
+        { a: {} },
+        {
+          a: {
+            f() {
+              return false;
+            },
+          },
+        },
+      ),
+    ).toEqual([['a.f:undefined', 'a.f:"f() {return false;}"']]);
+  });
 });

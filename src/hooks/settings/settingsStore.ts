@@ -8,6 +8,7 @@ import NeedsStore, { logsNeedsEnable } from '../needs/needsStore';
 import NotificationsStore, { logsNotificationsEnable } from '../notifications/notificationsStore';
 import CacheStore, { logsCacheEnable } from '../cache/cacheStore';
 import TimerStore, { logsTimerEnable } from '../timer/timerStore';
+import ScenariosStore, { logsScenariosEnable } from '../scenarios/scenariosStore';
 
 import { TSettingsState, ISettingsData } from './settings.types';
 
@@ -35,6 +36,7 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
             NotificationsStore,
             CacheStore,
             TimerStore,
+            ScenariosStore,
           ].forEach((item) => {
             item.logs(true);
           });
@@ -47,6 +49,7 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
           logsNotificationsEnable();
           logsCacheEnable();
           logsTimerEnable();
+          logsScenariosEnable();
         }
 
         if (modules?.cache) CacheStore.initialize(modules.cache);
@@ -54,6 +57,7 @@ const SettingsStore = makeStore<TSettingsState>(initialState, dataOptions).enric
         if (modules?.notifications) NotificationsStore.initialize(modules.notifications);
         if (modules?.https) HttpsStore.initialize(modules.https);
         if (modules?.needs) NeedsStore.initialize(modules.needs);
+        if (modules?.scenarios) ScenariosStore.initialize(modules.scenarios);
 
         return {};
       });

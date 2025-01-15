@@ -4,11 +4,10 @@ import { type IContext } from '../context';
 
 export type TDataState = Object;
 
-export type IStoreStateFn<S> = ((prev: S) => S) | S;
 export interface IStoreBase<S extends TDataState> extends Object {
   useSubscribe<T = unknown>(listener: (state: S) => T): T;
   // TODO: with option merge must type works for partial state
-  setState(fn: IStoreStateFn<S>): void;
+  setState(fn: SetFn<S>): void;
   reset: IContext<S>['reset'];
   /**
    * @deprecated use useSubscribe

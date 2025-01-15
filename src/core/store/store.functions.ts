@@ -4,7 +4,7 @@ import { onlyPublic, TOnlyPublic } from '@utils';
 import { createContext, IContextOptions, IContext } from '../context';
 // import { makeEffectOn } from '../helper';
 
-import { TDataState, IStore, IStoreStateFn, TStoreEnrich, TStoreEnrichMethods } from './store.types';
+import { TDataState, IStore, TStoreEnrich, TStoreEnrichMethods } from './store.types';
 
 // const useSubscribe2 = <S extends TDataState = {}, T = unknown>(Context: IContext<S>, listener: (state: S) => T): T => {
 //   const refListener = React.useRef(listener);
@@ -46,8 +46,8 @@ export const makeSubscribe = <S extends TDataState = {}>(Context: IContext<S>): 
   };
 };
 
-export const makeSetState = <S extends TDataState = {}>(Context: IContext<S>): ((fn: IStoreStateFn<S>) => void) => {
-  return (fn: IStoreStateFn<S>) => {
+export const makeSetState = <S extends TDataState = {}>(Context: IContext<S>): ((fn: SetFn<S>) => void) => {
+  return (fn: SetFn<S>) => {
     Context.state = typeof fn === 'function' ? fn(Context.getState()) : fn;
   };
 };
