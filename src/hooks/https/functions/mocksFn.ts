@@ -1,9 +1,9 @@
 import { TCustomFetchCheck, THttpsMockConfig } from '../https.types';
 
 export const makeMocksFn = (mocks: THttpsMockConfig): TCustomFetchCheck => {
-  return ({ input, init, mockName, requestName }): Response | void => {
+  return ({ input, init, mockName, requestName, options }): Response | void => {
     if (mocks?.additionalRules) {
-      const response = mocks.additionalRules({ input, init, mockName, requestName });
+      const response = mocks.additionalRules({ input, init, mockName, requestName, options });
       if (response) return response;
     }
     // TODO: mockName когда появятся сценарии

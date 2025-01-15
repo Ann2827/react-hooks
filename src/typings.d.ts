@@ -35,3 +35,9 @@ type RequiredRecursive<T> = {
 
 type PartialSample<T, K extends keyof any> = Required<Omit<T, K>> & Partial<Pick<T, K>>;
 type RequiredSample<T, K extends keyof any> = Required<Pick<T, K>> & Partial<Omit<T, K>>;
+
+type SetFn<S> = ((prev: S) => S) | S;
+
+type PartialRecursive<T> = {
+  [P in keyof T]?: PartialRecursive<T[P]>;
+};

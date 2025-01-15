@@ -24,13 +24,13 @@ import {
   THttpsStatusNamedValue,
   THttpsInitValidationFn,
   THttpsInitializeToken,
+  THttpsStateStatusLog,
 } from './https.types';
 import { makeCustomFetch, fetchDataHandle, makeMocksFn } from './functions';
 
 const ABORT_RATE_LIMIT_INTERVAL = 10; // sec
 const ABORT_RATE_LIMIT_TRIES = 5;
 const ABORT_HOLD_TIME = 30; // sec
-const MOCK_DELAY = 3; // sec
 const WAIT_TOKEN_TIME_LIMIT = 10; // sec
 
 const dataOptions: Partial<IContextOptions> = {
@@ -42,9 +42,16 @@ export const logsHttpsEnable = (): void => {
   dataOptions.logger = true;
 };
 const initialState: THttpsState = {
-  settings: { loader: false, messages: false, mockMode: false, waitToken: false, requestWithoutToken: false },
+  settings: {
+    loader: false,
+    messages: false,
+    mockMode: false,
+    waitToken: false,
+    requestWithoutToken: false,
+    mockDelay: 3,
+  },
   namedRequests: null,
-  status: { request: {}, named: {} },
+  status: { request: {}, named: {}, logs: {} },
   tokens: null,
   validation: null,
   // customFetch: makeCustomFetch(() => {}, { mockDelay: MOCK_DELAY, realFallback: false, makeMock: false }),
@@ -61,7 +68,6 @@ const defaultStatusRequest: THttpsStateStatusRequest = {
   timeMarker: 0,
   requestCounter: 0,
   onHold: false,
-  response: null,
   tokenName: null,
 };
 
@@ -82,6 +88,11 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
     const updateStatusNamed = (statusKey: THttpsStatusKey, data?: THttpsStatusNamedValue): void => {
       setState((prev) => {
         return { ...prev, status: { ...prev.status, named: { ...prev.status.named, [statusKey]: data } } };
+      });
+    };
+    const updateStatusLog = (statusKey: THttpsStatusKey, data?: THttpsStateStatusLog): void => {
+      setState((prev) => {
+        return { ...prev, status: { ...prev.status, logs: { ...prev.status.logs, [statusKey]: data } } };
       });
     };
     const needAbort = (statusKey: THttpsStatusKey): boolean => {
@@ -164,7 +175,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       const { statusKey, withLoader, withMessages } = settings;
 
       if (needAbort(statusKey)) return {};
-      updateStatusRequest(statusKey, { value: 'pending', code: 0, response: null });
+      updateStatusRequest(statusKey, { value: 'pending', code: 0 });
 
       if (withLoader) LoaderStore.activate();
 
@@ -173,6 +184,7 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
       const fetchData = fetchDataHandle(url, requestInit, options);
       try {
         response = await state().customFetch(...fetchData, {
+          ...options,
           requestName: statusKey,
           mockName: options?.mockName,
         });
@@ -186,7 +198,8 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
         dataJson = await response.json();
       }
 
-      updateStatusRequest(statusKey, { value: 'stop', code: response.status, response });
+      updateStatusRequest(statusKey, { value: 'stop', code: response.status });
+      updateStatusLog(statusKey, { input: url, init: fetchData[1], response, dataJson, options });
       if (withLoader) LoaderStore.determinate();
       if (withMessages) {
         const messageData = MessagesStore.parse(response, dataJson);
@@ -200,8 +213,9 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
           { message: 'DataJSON:', data: dataJson },
         ]);
 
-      const validation: THttpsInitValidationFn<Exclude<K, string>> | undefined =
-        state().validation?.[statusKey as Exclude<K, string>];
+      const validation: THttpsInitValidationFn<K> | undefined = state().validation?.[
+        statusKey as K
+      ] as THttpsInitValidationFn<K>;
 
       return { dataJson, response, validation };
     };
@@ -216,13 +230,21 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
             return { ...p, [name]: { token: null, tokenTemplate: template, cache } };
           }, {} as THttpsStateTokens);
         }
-        if (namedRequests) update.namedRequests = { ...namedRequests };
-        if (validation) update.validation = { ...validation };
+        if (namedRequests) {
+          update.namedRequests = { ...namedRequests };
+          update.validation = Object.fromEntries(
+            (Object.keys(namedRequests) as Array<keyof typeof namedRequests>).map((k) => [
+              k,
+              validation?.[k] ||
+                ((d: unknown, _r?: Response): d is IHttpsRequestsConfig[keyof IHttpsRequestsConfig][1] => true),
+            ]),
+          ) as THttpsState['validation'];
+        }
         if (settings) {
           update.settings = { ...prev.settings, ...settings };
         }
         update.customFetch = makeCustomFetch(makeMocksFn(mocks || {}), {
-          mockDelay: MOCK_DELAY,
+          mockDelay: settings?.mockDelay,
           realFallback: false,
           makeMock: settings?.mockMode,
         });

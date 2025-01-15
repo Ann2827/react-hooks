@@ -79,3 +79,7 @@ export const fillByArray = <K extends string, V>(keys: K[], value: V): Record<K,
 //   ) => void } extends Record<keyof T, (y: infer O) => void> ?
 //   O extends infer U ? { [K in keyof O]: O[K] } : never : never;
 /* eslint-enable */
+
+export function stringifyFunction(_key: string, val: any) {
+  return typeof val === 'function' ? ('' + val).replaceAll('\n', '').replaceAll('  ', '') : val;
+}

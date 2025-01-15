@@ -191,7 +191,9 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     await action(key, NeedsActionTypes.refresh, ...args);
   };
   const set: INeedsData['set'] = (key, dataJsonFormat): ReturnType<INeedsData['set']> => {
-    updateSuccessData(key, dataJsonFormat);
+    // @ts-ignore
+    const updateData = typeof dataJsonFormat === 'function' ? dataJsonFormat(state().store?.[key]) : dataJsonFormat;
+    updateSuccessData(key, updateData);
   };
 
   return {

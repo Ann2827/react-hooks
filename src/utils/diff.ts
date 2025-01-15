@@ -1,4 +1,5 @@
 import { isObject, isArray, isBoolean, isNull, isNumber, isString, isUndefined, isFunction } from './guards';
+import { stringifyFunction } from './object';
 
 type DataType = 'object' | 'number' | 'array' | 'boolean' | 'null' | 'string' | 'undefined' | 'function' | 'unknown';
 type DiffT = string | null | boolean | undefined;
@@ -19,10 +20,10 @@ const toWrite = (data: unknown, type: Exclude<DataType, 'unknown'>): DiffT => {
   switch (type) {
     case 'array':
     case 'object':
-      return JSON.stringify(data);
-    case 'number':
     case 'function':
-      return (data as number | object | Function).toString();
+      return JSON.stringify(data, stringifyFunction);
+    case 'number':
+      return (data as number).toString();
     case 'string':
     case 'undefined':
     case 'null':
@@ -46,9 +47,11 @@ export const diff = (data1: unknown, data2: unknown, prefix = ''): Array<[string
   const type2 = getType(data2);
 
   if (type1 === 'unknown' || type2 === 'unknown') return result;
-  if (toWrite(data1, type1) === toWrite(data2, type2)) return result;
+  const toWrite1 = toWrite(data1, type1);
+  const toWrite2 = toWrite(data2, type2);
+  if (toWrite1 === toWrite2) return result;
   if (type1 !== type2 || type1 !== 'object' || type2 !== 'object') {
-    result.push([getStart(prefix) + toWrite(data1, type1), getStart(prefix) + toWrite(data2, type2)]);
+    result.push([getStart(prefix) + toWrite1, getStart(prefix) + toWrite2]);
     return result;
   }
 

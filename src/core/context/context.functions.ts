@@ -1,4 +1,4 @@
-import { loggerState, loggerMessage, cleanObjKeys, diff } from '@utils';
+import { loggerState, loggerMessage, cleanObjKeys, diff, stringifyFunction } from '@utils';
 
 import type { IContext, IContextOptions, TContextFn } from './context.types';
 
@@ -65,7 +65,8 @@ export class CreateContext<S extends Object> implements IContext<S> {
     const diffState = diff(cloneThisState, mergeNewState);
 
     // TODO: может можно доверять условию на diffState?
-    if (JSON.stringify(cloneThisState) !== JSON.stringify(mergeNewState)) {
+    // Ни JSON.stringify ни diffState не реагируют на изменения в функциях
+    if (JSON.stringify(cloneThisState, stringifyFunction) !== JSON.stringify(mergeNewState, stringifyFunction)) {
       this.#state = mergeNewState;
       this.#event(cloneThisState, mergeNewState, diffState);
 
@@ -93,7 +94,7 @@ export class CreateContext<S extends Object> implements IContext<S> {
 
   init(fn: (prev: S) => S) {
     if (this.#options.logger) loggerMessage(this.#options.hookName, 'Was initialized');
-    this.state = fn(this.state);
+    this.state = fn(this.#initialState);
     this.restart = () => {
       if (this.#options.logger) loggerMessage(this.#options.hookName, 'Was restarted');
       fn(this.#initialState);

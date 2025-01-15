@@ -66,6 +66,9 @@ export type TNeedsInitialize = {
   store: INeedsStoreConfig;
   requests: { [K in keyof INeedsStoreConfig]: keyof IHttpsRequestsConfig | [keyof IHttpsRequestsConfig, ...string[]] };
   cache: TNeedsCache;
+  /**
+   * Правила форматирования
+   */
   rules: <K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
     args: TNeedsInitializeRulesArgs<K>,
   ) => INeedsStoreConfig[K];
@@ -82,6 +85,7 @@ export enum NeedsActionTypes {
   refresh = 'refresh',
   /**
    * Добавляет к старым данным новые
+   * TODO: Убрать и использовать set???
    */
   merge = 'merge',
 }
@@ -93,7 +97,10 @@ export interface INeedsData {
    */
   update(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
   request(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
-  set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(key: K, dataJsonFormat: INeedsStoreConfig[K]): void;
+  set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
+    key: K,
+    dataJsonFormat: SetFn<INeedsStoreConfig[K]>,
+  ): void;
   action(key: keyof INeedsStoreConfig, type: NeedsActionTypes, ...args: any): Promise<void>;
   // TODO: remove
   st: () => TNeedsState;
@@ -114,6 +121,7 @@ export interface INeeds {
 
   /**
    * Update
+   * @deprecated Use action(key, NeedsActionTypes.refresh, ...args)
    */
   update: INeedsData['update'];
 

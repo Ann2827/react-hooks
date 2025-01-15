@@ -47,7 +47,8 @@
     "t:loader": "jest src/hooks/loader/loader.test.ts",
     "t:diff": "jest src/utils/diff.test.ts",
     "t:notifications": "jest src/hooks/notifications/notifications.test.ts",
-    "t:timer": "jest src/hooks/timer/timer.test.ts"
+    "t:timer": "jest src/hooks/timer/timer.test.ts",
+    "t:scenarios": "jest src/hooks/scenarios/scenarios.test.ts"
   },
   "peerDependencies": {
     "react": "16 || 17 || 18 || 19",

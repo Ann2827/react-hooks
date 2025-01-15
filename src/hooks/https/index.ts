@@ -6,6 +6,10 @@ export type {
   IHttpsRequestsConfig,
   IHttpsTokenNames,
   IHttpsMockNames,
+  THttpsInitValidationFn,
+  THttpsResponseObj,
+  ICustomFetchCheckProps,
+  THttpsStateStatusLog,
 } from './https.types';
 
 export { default as useHttps } from './https.hook';
