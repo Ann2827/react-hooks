@@ -13,6 +13,10 @@ export class CreateContext<S extends Object> implements IContext<S> {
 
   #options: IContextOptions;
 
+  #event(prevState: S, newState: S, diffState: Array<[string, string]>): void {
+    this.#listeners.forEach((listener) => listener(prevState, newState, diffState));
+  }
+
   constructor(initialState: S, options?: Partial<IContextOptions>) {
     this.#initialState = initialState;
     this.#listeners = [];
@@ -24,7 +28,6 @@ export class CreateContext<S extends Object> implements IContext<S> {
       merge: Boolean(options?.merge),
     };
 
-    // this.#event = this.#event.bind(this);
     this.on = this.on.bind(this);
     this.reset = this.reset.bind(this);
     this.getState = this.getState.bind(this);
@@ -34,10 +37,6 @@ export class CreateContext<S extends Object> implements IContext<S> {
     if (typeof this._test === 'function') {
       this._test = this._test.bind(this);
     }
-  }
-
-  #event(prevState: S, newState: S, diffState: Array<[string, string]>): void {
-    this.#listeners.forEach((listener) => listener(prevState, newState, diffState));
   }
 
   public on(fn: TContextFn<S>): () => void {
@@ -57,6 +56,7 @@ export class CreateContext<S extends Object> implements IContext<S> {
     const { logger, hookName, cleanKeys, merge } = this.#options;
     const cloneThisState: S = Object.assign({}, this.#state);
     const cloneNewState: S = Object.assign({}, newState);
+    // TODO: починить
     const cleanNewState: S = cleanKeys ? cleanObjKeys<S, S>(this.#initialState, cloneNewState) : cloneNewState;
     // TODO: depMerge
     const mergeNewState: S = merge
