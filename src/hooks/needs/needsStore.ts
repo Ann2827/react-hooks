@@ -131,7 +131,11 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     const [requestName, ...path] = Array.isArray(requestData) ? requestData : [requestData];
 
     if (!requestName) {
-      loggerMessage(dataOptions.hookName!, 'namedRequest not found');
+      loggerMessage(dataOptions.hookName!, `namedRequest ${key} not found`);
+      setState((prev) => ({
+        ...prev,
+        state: prev.state ? { ...prev.state, [key]: false } : null,
+      }));
       return;
     }
     const { response, dataJson } = await HttpsStore.namedRequest(requestName, ...args);
