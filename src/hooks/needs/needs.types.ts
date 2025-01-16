@@ -85,17 +85,12 @@ export enum NeedsActionTypes {
   refresh = 'refresh',
   /**
    * Добавляет к старым данным новые
-   * TODO: Убрать и использовать set???
    */
   merge = 'merge',
 }
 
 export interface INeedsData {
   initialize(initial: Partial<TNeedsInitialize>): void;
-  /**
-   * @deprecated Use action(key, NeedsActionTypes.refresh, ...args)
-   */
-  update(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
   request(key: keyof INeedsStoreConfig, ...args: any): Promise<void>;
   set<K extends keyof INeedsStoreConfig = keyof INeedsStoreConfig>(
     key: K,
@@ -118,12 +113,6 @@ export interface INeeds {
    * Needs store
    */
   store: TNeedsState['store'];
-
-  /**
-   * Update
-   * @deprecated Use action(key, NeedsActionTypes.refresh, ...args)
-   */
-  update: INeedsData['update'];
 
   /**
    * Set exists data

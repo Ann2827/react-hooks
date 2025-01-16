@@ -100,12 +100,16 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
 
             const cacheConfig = state()?.cache;
             const requestName = p.split('.')[2];
-            const requestResult = nextState.status.request[requestName];
+            const requestResult = nextState.status.logs[requestName];
             if (!cacheConfig || !requestResult?.response) return;
 
             Object.entries(cacheConfig).forEach(([needsKey, cacheValue]) => {
               const cacheValueResponse = cacheValue?.clean?.otherResponse;
-              if (cacheValueResponse?.which === 'token' && cacheValueResponse.token !== requestResult.tokenName) return;
+              if (
+                cacheValueResponse?.which === 'token' &&
+                cacheValueResponse.token !== nextState.status.request[requestName]?.tokenName
+              )
+                return;
               if (
                 cacheValueResponse?.is === requestResult.response?.ok ||
                 (requestResult.response?.status &&
@@ -127,7 +131,11 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     const [requestName, ...path] = Array.isArray(requestData) ? requestData : [requestData];
 
     if (!requestName) {
-      loggerMessage(dataOptions.hookName!, 'namedRequest not found');
+      loggerMessage(dataOptions.hookName!, `namedRequest ${key} not found`);
+      setState((prev) => ({
+        ...prev,
+        state: prev.state ? { ...prev.state, [key]: false } : null,
+      }));
       return;
     }
     const { response, dataJson } = await HttpsStore.namedRequest(requestName, ...args);
@@ -187,9 +195,6 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
     }
     await action(key, type, ...args);
   };
-  const update: INeedsData['update'] = async (key, ...args): ReturnType<INeedsData['update']> => {
-    await action(key, NeedsActionTypes.refresh, ...args);
-  };
   const set: INeedsData['set'] = (key, dataJsonFormat): ReturnType<INeedsData['set']> => {
     // @ts-ignore
     const updateData = typeof dataJsonFormat === 'function' ? dataJsonFormat(state().store?.[key]) : dataJsonFormat;
@@ -198,7 +203,6 @@ const NeedsStore = makeStore<TNeedsState>(initialState, dataOptions).enrich<INee
 
   return {
     initialize,
-    update,
     request,
     set,
     st: () => state(),

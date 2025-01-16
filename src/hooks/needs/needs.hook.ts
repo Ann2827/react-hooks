@@ -10,7 +10,6 @@ const useNeeds = (needs: TNeedsArgs): INeeds => {
 
   // const state = NeedsStore.useSubscribe<TNeedsState['state']>((s) => s.state);
   // const store = NeedsStore.useSubscribe<TNeedsState['store']>((s) => s.store);
-  const update = React.useCallback<INeeds['update']>(NeedsStore.update, []);
   const set = React.useCallback<INeeds['set']>(NeedsStore.set, []);
 
   const [state, setState] = React.useState<TNeedsState['state']>(NeedsStore.state().state);
@@ -34,7 +33,6 @@ const useNeeds = (needs: TNeedsArgs): INeeds => {
   return {
     state,
     store,
-    update,
     set,
     useSubscribe: React.useCallback<INeeds['useSubscribe']>(NeedsStore.useSubscribe, []),
     reset: React.useCallback<INeeds['reset']>(NeedsStore.reset, []),

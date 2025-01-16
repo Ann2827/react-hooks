@@ -24,11 +24,11 @@ jobs:
           path: ./node_modules
           key: ${{ runner.os }}-nodeModules
 
-      - name: Install Example
-        continue-on-error: false
-        run: |
-          cd example
-          yarn install --immutable --immutable-cache --check-cache
+      # - name: Install Example
+      #   continue-on-error: false
+      #   run: |
+      #     cd example
+      #     yarn install --immutable --immutable-cache --check-cache
 
       - name: Test
         continue-on-error: false
@@ -38,24 +38,24 @@ jobs:
         continue-on-error: false
         run: yarn build
 
-      - name: Author
-        continue-on-error: false
-        run: |
-          cd example
-          git config --local user.email "ann.bystrova96@mail.ru"
-          git config --local user.name "Ann Bystrova"
+      # - name: Author
+      #   continue-on-error: false
+      #   run: |
+      #     cd example
+      #     git config --local user.email "ann.bystrova96@mail.ru"
+      #     git config --local user.name "Ann Bystrova"
 
-      - name: Build Example
-        continue-on-error: false
-        run: yarn predeploy
+      # - name: Build Example
+      #   continue-on-error: false
+      #   run: yarn predeploy
 
-      - name: Upload Artifacts for GitHub Pages
-        continue-on-error: false
-        uses: actions/upload-artifact@v3
-        with:
-          name: githubPages
-          path: ./example/build
-          retention-days: 1
+      # - name: Upload Artifacts for GitHub Pages
+      #   continue-on-error: false
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: githubPages
+      #     path: ./example/build
+      #     retention-days: 1
 
       - name: Upload Artifacts for Library
         uses: actions/upload-artifact@v3
@@ -74,21 +74,21 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Download Artifacts for GitHub Pages
-        continue-on-error: false
-        uses: actions/download-artifact@v3
-        with:
-          name: githubPages
-          path: ./example/build
+      # - name: Download Artifacts for GitHub Pages
+      #   continue-on-error: false
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: githubPages
+      #     path: ./example/build
 
-      - name: Deploy to GitHub Pages
-        continue-on-error: false
-        uses: Cecilapp/GitHub-Pages-deploy@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          email: ann.bystrova96@mail.ru
-          build_dir: example/build
+      # - name: Deploy to GitHub Pages
+      #   continue-on-error: false
+      #   uses: Cecilapp/GitHub-Pages-deploy@v3
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     email: ann.bystrova96@mail.ru
+      #     build_dir: example/build
 
       - name: Download Artifacts for Library
         continue-on-error: false
