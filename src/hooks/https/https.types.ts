@@ -7,7 +7,7 @@ import type { IStore, TStoreEnrich } from '@core';
  * ==========================================
  */
 
-type THttpsRequestsConfig = Record<string, [(arg?: any) => IHttpsRequest, any, any?]>;
+type THttpsRequestsConfig = Record<string, [(...args: any) => IHttpsRequest, any, any?]>;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IHttpsRequestsConfig extends THttpsRequestsConfig {}
 
