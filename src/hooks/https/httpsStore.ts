@@ -188,14 +188,17 @@ const HttpsStore = makeStore<THttpsState>(initialState, dataOptions).enrich<IHtt
           requestName: statusKey,
           mockName: options?.mockName,
         });
-        dataJson = await response.json();
       } catch (error: any) {
         response = new Response(JSON.stringify({}), {
           status: 503,
           statusText: error?.message || 'Service Unavailable',
         });
-        // По-хорошему тут тоже нужен try, если body станет настраиваемым
+      }
+      try {
         dataJson = await response.json();
+      } catch {
+        // добавить значение, если body станет настраиваемым
+        dataJson = {};
       }
 
       updateStatusRequest(statusKey, { value: 'stop', code: response.status });
